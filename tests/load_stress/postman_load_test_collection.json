@@ -1,0 +1,415 @@
+{
+  "info": {
+    "name": "Investment System - Load & Stress Tests",
+    "description": "Postman collection for load testing the Investment & Wallet Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://127.0.0.1:8000/api/v1",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{admin_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin@example.com\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login/",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login", ""]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('admin_token', response.access);",
+                  "    pm.collectionVariables.set('admin_id', response.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "User Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"testuser@example.com\",\n  \"password\": \"TestPass123!\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login/",
+              "host": ["{{base_url}}"],
+              "path": ["auth", "login", ""]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.collectionVariables.set('user_token', response.access);",
+                  "    pm.collectionVariables.set('user_id', response.user.id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Wallet Operations",
+      "item": [
+        {
+          "name": "Get Wallet Balance",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/wallet/balance/",
+              "host": ["{{base_url}}"],
+              "path": ["wallet", "balance", ""]
+            }
+          }
+        },
+        {
+          "name": "Create Deposit Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currency\": \"INR\",\n  \"amount\": \"1000.00\",\n  \"payment_method\": \"bank_transfer\",\n  \"payment_details\": {\n    \"account_number\": \"1234567890\",\n    \"ifsc_code\": \"SBIN0001234\",\n    \"account_holder_name\": \"Test User\",\n    \"bank_name\": \"State Bank of India\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/deposit-requests/",
+              "host": ["{{base_url}}"],
+              "path": ["deposit-requests", ""]
+            }
+          }
+        },
+        {
+          "name": "Create Withdrawal Request",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currency\": \"INR\",\n  \"amount\": \"100.00\",\n  \"payout_method\": \"bank_transfer\",\n  \"payout_details\": {\n    \"account_number\": \"1234567890\",\n    \"ifsc_code\": \"SBIN0001234\",\n    \"account_holder_name\": \"Test User\",\n    \"bank_name\": \"State Bank of India\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/withdraw/",
+              "host": ["{{base_url}}"],
+              "path": ["withdraw", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Investment Operations",
+      "item": [
+        {
+          "name": "Get Investment Plans",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/investment/investment-plans/",
+              "host": ["{{base_url}}"],
+              "path": ["investment", "investment-plans", ""]
+            }
+          }
+        },
+        {
+          "name": "Create Investment",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"plan\": \"{{plan_id}}\",\n  \"amount\": \"500.00\",\n  \"currency\": \"inr\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/investment/investments/",
+              "host": ["{{base_url}}"],
+              "path": ["investment", "investments", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Admin Operations",
+      "item": [
+        {
+          "name": "Get Dashboard Summary",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/dashboard/summary/",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "dashboard", "summary", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Users List",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/admin/users/",
+              "host": ["{{base_url}}"],
+              "path": ["admin", "users", ""]
+            }
+          }
+        },
+        {
+          "name": "Approve Deposit",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{admin_token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"transaction_reference\": \"TXN{{$randomInt}}\",\n  \"notes\": \"Load test approval\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/deposits/approve/{{deposit_id}}/",
+              "host": ["{{base_url}}"],
+              "path": ["deposits", "approve", "{{deposit_id}}", ""]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Transaction Operations",
+      "item": [
+        {
+          "name": "Get Transactions",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/transactions/",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", ""]
+            }
+          }
+        },
+        {
+          "name": "Get Transactions with Filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/transactions/?transaction_type=DEPOSIT&currency=INR&page=1",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", ""],
+              "query": [
+                {
+                  "key": "transaction_type",
+                  "value": "DEPOSIT"
+                },
+                {
+                  "key": "currency",
+                  "value": "INR"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Load Test Scenarios",
+      "item": [
+        {
+          "name": "Concurrent Wallet Balance Checks",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/wallet/balance/",
+              "host": ["{{base_url}}"],
+              "path": ["wallet", "balance", ""]
+            }
+          }
+        },
+        {
+          "name": "Concurrent Transaction Queries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/transactions/?page={{$randomInt(1,5)}}",
+              "host": ["{{base_url}}"],
+              "path": ["transactions", ""],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "{{$randomInt(1,5)}}"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Concurrent Investment Plan Queries",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/investment/investment-plans/",
+              "host": ["{{base_url}}"],
+              "path": ["investment", "investment-plans", ""]
+            }
+          }
+        }
+      ]
+    }
+  ]
+}
+

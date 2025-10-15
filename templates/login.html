@@ -1,0 +1,220 @@
+{% extends 'user_base.html' %}
+{% load static %}
+{% block body %}
+
+<body class="bg-login">
+
+  <div class="container-fluid my-5">
+    <div class="row">
+      <div class="col-12 col-md-8 col-lg-6 col-xl-5 col-xxl-4 mx-auto">
+        <div class="card rounded-4">
+          <div style="background-color: #865d1a; border-radius: 20px;" class="card-body p-5">
+
+            <div class="text-center">
+              <img src="{% static 'assets/img/logo/logo.png' %}" class="mb-4" width="145" alt="logo">
+            </div>
+
+            <h4 style="color: black;" class="fw-bold text-center">Get Started Now</h4>
+            <p style="color: wheat;" class="mb-0 text-center">Enter your credentials to login your account</p>
+            {% if messages %}
+            {% for message in messages %}
+            <div style="color: red; background: wheat;"
+              class="alert alert-{{ message.tags }} alert-dismissible fade show text-center mt-3" role="alert">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+            {% endif %}
+
+            <div class="form-body my-4">
+              <form id="loginForm" method="POST">
+                {% csrf_token %}
+
+                <div class="col-12 mb-3">
+                  <input type="text" name="email" class="form-control" placeholder="Enter Email" required>
+                </div>
+
+                <div class="col-12 mb-3">
+                  <div class="input-group" id="show_hide_password">
+                    <input type="password" name="password" class="form-control border-end-0"
+                      placeholder="Enter Password" required>
+                    <a href="javascript:;" style="background-color: white !important;"
+                      class="input-group-text bg-transparent">
+                      <i class="bi bi-eye-slash-fill"></i>
+                    </a>
+                  </div>
+                </div>
+
+                <div class="row align-items-center mb-3">
+                  <div class="col-md-6">
+                    <div class="form-check form-switch">
+                      <input class="form-check-input" type="checkbox" id="flexSwitchCheckChecked">
+                      <label style="color: wheat;" class="form-check-label" for="flexSwitchCheckChecked">Remember
+                        Me</label>
+                    </div>
+                  </div>
+                  <div class="col-md-6 text-end">
+                    <a href="{% url 'forgot-password' %}">Forgot Password?</a>
+                  </div>
+                </div>
+
+                <div class="col-12">
+                  <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                  </div>
+                </div>
+
+                <div class="col-12 mt-3 text-start">
+                  <p style="color: wheat;" class="mb-0">Don't have an account yet? <a href="{% url 'sign-up' %}">Sign up
+                      here</a></p>
+                </div>
+              </form>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- plugins -->
+  <script src="{% static 'dashboard/assets/js/jquery.min.js' %}"></script>
+  <script src="{% static 'assets/js/auth.js' %}"></script>
+  
+  <script>
+    $(document).ready(function () {
+      // Password toggle functionality
+      $("#show_hide_password a").on('click', function (event) {
+        event.preventDefault();
+        const input = $('#show_hide_password input');
+        const icon = $('#show_hide_password i');
+        if (input.attr("type") === "text") {
+          input.attr('type', 'password');
+          icon.addClass("bi-eye-slash-fill").removeClass("bi-eye-fill");
+        } else {
+          input.attr('type', 'text');
+          icon.removeClass("bi-eye-slash-fill").addClass("bi-eye-fill");
+        }
+      });
+
+      // Login form submission with AJAX
+      $('#loginForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        const formData = {
+          email: $('input[name="email"]').val(),
+          password: $('input[name="password"]').val()
+        };
+        
+        // Show loading state
+        const submitBtn = $(this).find('button[type="submit"]');
+        const originalText = submitBtn.text();
+        submitBtn.text('Logging in...').prop('disabled', true);
+        
+        fetch('/api/v1/auth/login/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(formData)
+        })
+        .then(response => {
+          console.log('Login response status:', response.status);
+          console.log('Login response headers:', response.headers);
+          if (!response.ok) {
+            console.error('Login failed with status:', response.status);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log('Login response data:', data);
+          if (data.tokens && data.tokens.access) {
+            // Store JWT tokens using AuthManager
+            AuthManager.setTokens(data.tokens.access, data.tokens.refresh);
+            
+            // Store user data for profile and other uses
+            if (data.user) {
+              localStorage.setItem('user_data', JSON.stringify(data.user));
+            }
+            
+            showSuccess('Login successful! Redirecting...');
+            
+            // Redirect to dashboard
+            setTimeout(() => {
+              window.location.href = '/auth/dashboard/';
+            }, 1000);
+          } else {
+            // Handle error - show specific field errors if available
+            let errorMsg = 'Login failed';
+            if (data.email) errorMsg += ': ' + data.email[0];
+            else if (data.password) errorMsg += ': ' + data.password[0];
+            else if (data.non_field_errors) errorMsg += ': ' + data.non_field_errors[0];
+            else if (data.detail) errorMsg = data.detail;
+            
+            showError(errorMsg);
+          }
+        })
+        .catch(error => {
+          console.error('Login error:', error);
+          showError('Login failed: ' + error.message);
+        })
+        .finally(() => {
+          // Reset button
+          submitBtn.text(originalText).prop('disabled', false);
+        });
+      });
+    });
+
+    // Notification functions
+    function showSuccess(message) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+      alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+      alertDiv.innerHTML = `
+        <i class="bi bi-check-circle me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      document.body.appendChild(alertDiv);
+      
+      setTimeout(() => {
+        if (alertDiv.parentNode) {
+          alertDiv.remove();
+        }
+      }, 5000);
+    }
+
+    function showError(message) {
+      const alertDiv = document.createElement('div');
+      alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+      alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+      alertDiv.innerHTML = `
+        <i class="bi bi-exclamation-triangle me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      `;
+      document.body.appendChild(alertDiv);
+      
+      setTimeout(() => {
+        if (alertDiv.parentNode) {
+          alertDiv.remove();
+        }
+      }, 7000);
+    }
+
+    // Get CSRF token function
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+  </script>
+</body>
+{% endblock %}

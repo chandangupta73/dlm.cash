@@ -1,0 +1,1637 @@
+{% extends 'user_menu.html' %}
+{% comment %}
+BACKUP OF OLD DASHBOARD - REPLACED WITH new_dashboard.html
+This file is kept for reference but no longer used
+{% endcomment %}
+{% load static %}
+{% block main %}
+<!-- Load auth.js for JWT management -->
+<script src="{% static 'assets/js/auth.js' %}"></script>
+<!--start main wrapper-->
+<main class="main-wrapper">
+    <div class="main-content">
+        <!--breadcrumb-->
+        <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+            <div class="breadcrumb-title pe-3">Dashboard</div>
+            <div class="ps-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 p-0">
+                        <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a></li>
+                        <li class="breadcrumb-item active" aria-current="page">User Dashboard</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <!--end breadcrumb-->
+
+        <!-- Welcome Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <div class="d-flex align-items-center justify-content-between">
+                            <div>
+                                <h4 class="mb-1">Welcome back, {{ user.full_name }}! 👋</h4>
+                                <p class="text-muted mb-0">Manage your investments, KYC verification, and wallets from one place.</p>
+                            </div>
+                            <div class="text-end">
+                                <div class="badge bg-success fs-6">Active User</div>
+                                <p class="text-muted mb-0 mt-1">Member since {{ user.date_joined|date:"M Y" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="row mb-4">
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="avatar avatar-lg bg-primary bg-opacity-10 rounded">
+                                    <i class="material-icons-outlined text-primary fs-1">account_balance_wallet</i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h4 class="mb-1" id="inr-balance">₹0.00</h4>
+                                <p class="text-muted mb-0">INR Balance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="avatar avatar-lg bg-success bg-opacity-10 rounded">
+                                    <i class="material-icons-outlined text-success fs-1">currency_bitcoin</i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h4 class="mb-1" id="usdt-balance">0.000000</h4>
+                                <p class="text-muted mb-0">USDT Balance</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="avatar avatar-lg bg-warning bg-opacity-10 rounded">
+                                    <i class="material-icons-outlined text-warning fs-1">verified_user</i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h4 class="mb-1" id="kyc-status">PENDING</h4>
+                                <p class="text-muted mb-0">KYC Status</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center">
+                            <div class="flex-shrink-0">
+                                <div class="avatar avatar-lg bg-info bg-opacity-10 rounded">
+                                    <i class="material-icons-outlined text-info fs-1">trending_up</i>
+                                </div>
+                            </div>
+                            <div class="flex-grow-1 ms-3">
+                                <h4 class="mb-1" id="total-earnings">₹0.00</h4>
+                                <p class="text-muted mb-0">Total Earnings</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- KYC Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="mb-0">
+                            <i class="material-icons-outlined text-primary me-2">verified_user</i>
+                            KYC Verification
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if user.kyc_status == 'APPROVED' %}
+                            <div class="alert alert-success d-flex align-items-center" role="alert">
+                                <i class="material-icons-outlined me-2">check_circle</i>
+                                <div>
+                                    <strong>KYC Verified!</strong> Your account is fully verified and you can access all features.
+                                </div>
+                            </div>
+                        {% elif user.kyc_status == 'PENDING' %}
+                            <div class="alert alert-warning d-flex align-items-center" role="alert">
+                                <i class="material-icons-outlined me-2">pending</i>
+                                <div>
+                                    <strong>KYC Pending</strong> Please complete your verification to access all features.
+                                </div>
+                            </div>
+                        {% elif user.kyc_status == 'REJECTED' %}
+                            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                                <i class="material-icons-outlined me-2">error</i>
+                                <div>
+                                    <strong>KYC Rejected</strong> Please review and resubmit your documents.
+                                </div>
+                            </div>
+                        {% endif %}
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <div class="card border h-100" style="cursor: pointer;" onclick="openKYCDocumentModal()">
+                                    <div class="card-body text-center p-4">
+                                        <div class="avatar avatar-lg bg-primary bg-opacity-10 rounded-circle mx-auto mb-3">
+                                            <i class="material-icons-outlined text-primary fs-1">description</i>
+                                        </div>
+                                        <h6 class="mb-2">Document Verification</h6>
+                                        <p class="text-muted small mb-3">Upload your identity documents for verification</p>
+                                        <button class="btn btn-primary btn-sm">
+                                            <i class="material-icons-outlined me-1">upload_file</i>
+                                            Upload Documents
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card border h-100" style="cursor: pointer;" onclick="openVideoKYCModal()">
+                                    <div class="card-body text-center p-4">
+                                        <div class="avatar avatar-lg bg-success bg-opacity-10 rounded-circle mx-auto mb-3">
+                                            <i class="material-icons-outlined text-success fs-1">videocam</i>
+                                        </div>
+                                        <h6 class="mb-2">Video KYC</h6>
+                                        <p class="text-muted small mb-3">Complete video verification for faster processing</p>
+                                        <button class="btn btn-success btn-sm">
+                                            <i class="material-icons-outlined me-1">play_circle</i>
+                                            Start Video KYC
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Wallet Management Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="mb-0">
+                            <i class="material-icons-outlined text-primary me-2">account_balance_wallet</i>
+                            Wallet Management
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <div class="card border h-100" style="cursor: pointer;" onclick="openINRWalletModal()">
+                                    <div class="card-body text-center p-4">
+                                        <div class="avatar avatar-lg bg-primary bg-opacity-10 rounded-circle mx-auto mb-3">
+                                            <i class="material-icons-outlined text-primary fs-1">account_balance</i>
+                                        </div>
+                                        <h6 class="mb-2">INR Wallet</h6>
+                                        <p class="text-muted small mb-3">Manage your Indian Rupee wallet</p>
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-primary btn-sm" onclick="openINRWalletModal()">
+                                                <i class="material-icons-outlined me-1">account_balance_wallet</i>
+                                                View INR Wallet
+                                            </button>
+                                            <button class="btn btn-outline-primary btn-sm" onclick="createDepositRequest()">
+                                                <i class="material-icons-outlined me-1">add</i>
+                                                Deposit INR
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border h-100" style="cursor: pointer;" onclick="openUSDTWalletModal()">
+                                    <div class="card-body text-center p-4">
+                                        <div class="avatar avatar-lg bg-success bg-opacity-10 rounded-circle mx-auto mb-3">
+                                            <i class="material-icons-outlined text-success fs-1">currency_bitcoin</i>
+                                        </div>
+                                        <h6 class="mb-2">USDT Wallet</h6>
+                                        <p class="text-muted small mb-3">Manage your USDT cryptocurrency wallet</p>
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-success btn-sm" onclick="openUSDTWalletModal()">
+                                                <i class="material-icons-outlined me-1">account_balance_wallet</i>
+                                                View USDT Wallet
+                                            </button>
+                                            <button class="btn btn-outline-success btn-sm" onclick="generateUSDTWallet()">
+                                                <i class="material-icons-outlined me-1">add_circle</i>
+                                                Generate Wallet
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="card border h-100" style="cursor: pointer;" onclick="openTransactionsModal()">
+                                    <div class="card-body text-center p-4">
+                                        <div class="avatar avatar-lg bg-info bg-opacity-10 rounded-circle mx-auto mb-3">
+                                            <i class="material-icons-outlined text-info fs-1">swap_horiz</i>
+                                        </div>
+                                        <h6 class="mb-2">Transactions</h6>
+                                        <p class="text-muted small mb-3">View your transaction history</p>
+                                        <div class="d-grid gap-2">
+                                            <button class="btn btn-info btn-sm" onclick="openTransactionsModal()">
+                                                <i class="material-icons-outlined me-1">receipt_long</i>
+                                                View History
+                                            </button>
+                                            <button class="btn btn-outline-info btn-sm" onclick="createWithdrawalRequest()">
+                                                <i class="material-icons-outlined me-1">send</i>
+                                                Withdraw Funds
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="mb-0">
+                            <i class="material-icons-outlined text-primary me-2">flash_on</i>
+                            Quick Actions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-md-3 col-sm-6">
+                                <a href="{% url 'plans' %}" class="btn btn-outline-primary w-100 h-100 p-3">
+                                    <i class="material-icons-outlined fs-1 d-block mb-2">trending_up</i>
+                                    <span>Invest Now</span>
+                                </a>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <button class="btn btn-outline-success w-100 h-100 p-3" onclick="openReferralModal()">
+                                    <i class="material-icons-outlined fs-1 d-block mb-2">share</i>
+                                    <span>Refer Friends</span>
+                                </button>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <button class="btn btn-outline-info w-100 h-100 p-3" onclick="openSupportModal()">
+                                    <i class="material-icons-outlined fs-1 d-block mb-2">support_agent</i>
+                                    <span>Get Support</span>
+                                </button>
+                            </div>
+                            <div class="col-md-3 col-sm-6">
+                                <a href="{% url 'profile' %}" class="btn btn-outline-warning w-100 h-100 p-3">
+                                    <i class="material-icons-outlined fs-1 d-block mb-2">settings</i>
+                                    <span>Settings</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<!--end main wrapper-->
+
+<!-- KYC Document Upload Modal -->
+<div class="modal fade" id="kycDocumentModal" tabindex="-1" aria-labelledby="kycDocumentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="kycDocumentModalLabel">
+                    <i class="material-icons-outlined text-primary me-2">upload_file</i>
+                    Upload KYC Documents
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="kycDocumentForm">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label for="documentType" class="form-label">Document Type *</label>
+                            <select class="form-select" id="documentType" name="document_type" required>
+                                <option value="">Select Document Type</option>
+                                <option value="PAN">PAN Card</option>
+                                <option value="AADHAAR">Aadhaar Card</option>
+                                <option value="PASSPORT">Passport</option>
+                                <option value="DRIVING_LICENSE">Driving License</option>
+                                <option value="VOTER_ID">Voter ID</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="documentNumber" class="form-label">Document Number</label>
+                            <input type="text" class="form-control" id="documentNumber" name="document_number" placeholder="Enter document number">
+                        </div>
+                        <div class="col-12">
+                            <label for="documentFile" class="form-label">Document File *</label>
+                            <input type="file" class="form-control" id="documentFile" name="document_file" accept=".pdf,.jpg,.jpeg,.png" required>
+                            <div class="form-text">Accepted formats: PDF, JPG, JPEG, PNG (Max 5MB)</div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                                                <button type="button" class="btn btn-primary" onclick="submitKYCDocumentForm()">
+                                    <i class="material-icons-outlined me-1">upload</i>
+                                    Upload Document
+                                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Video KYC Modal -->
+<div class="modal fade" id="videoKYCModal" tabindex="-1" aria-labelledby="videoKYCModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="videoKYCModalLabel">
+                    <i class="material-icons-outlined text-success me-2">videocam</i>
+                    Video KYC Session
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center p-4">
+                    <div class="avatar avatar-lg bg-success bg-opacity-10 rounded-circle mx-auto mb-3">
+                        <i class="material-icons-outlined text-success fs-1">videocam</i>
+                    </div>
+                    <h6 class="mb-2">Start Video KYC</h6>
+                    <p class="text-muted mb-3">Click the button below to start your video verification session</p>
+                    <button class="btn btn-success btn-lg" onclick="startVideoKYC()">
+                        <i class="material-icons-outlined me-2">play_circle</i>
+                        Start Video Session
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- INR Wallet Modal -->
+<div class="modal fade" id="inrWalletModal" tabindex="-1" aria-labelledby="inrWalletModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="inrWalletModalLabel">
+                    <i class="material-icons-outlined text-primary me-2">account_balance_wallet</i>
+                    INR Wallet
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card border">
+                            <div class="card-body text-center p-4">
+                                <h4 class="text-primary mb-2">₹0.00</h4>
+                                <p class="text-muted mb-0">Available Balance</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border">
+                            <div class="card-body text-center p-4">
+                                <h4 class="text-success mb-2">₹0.00</h4>
+                                <p class="text-muted mb-0">Total Deposits</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h6>Recent Transactions</h6>
+                    <div class="text-center text-muted py-4">
+                        <i class="material-icons-outlined fs-1">receipt_long</i>
+                        <p class="mt-2">No transactions yet</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- USDT Wallet Modal -->
+<div class="modal fade" id="usdtWalletModal" tabindex="-1" aria-labelledby="usdtWalletModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="usdtWalletModalLabel">
+                    <i class="material-icons-outlined text-success me-2">currency_bitcoin</i>
+                    USDT Wallet
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card border">
+                            <div class="card-body text-center p-4">
+                                <h4 class="text-success mb-2">0.000000</h4>
+                                <p class="text-muted mb-0">Available Balance</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border">
+                            <div class="card-body text-center p-4">
+                                <h4 class="text-info mb-2">Not Generated</h4>
+                                <p class="text-muted mb-0">Wallet Status</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-3">
+                    <h6>Wallet Address</h6>
+                    <div class="text-center text-muted py-4">
+                        <i class="material-icons-outlined fs-1">account_balance_wallet</i>
+                        <p class="mt-2">No wallet generated yet</p>
+                        <button class="btn btn-success" onclick="generateUSDTWallet()">
+                            <i class="material-icons-outlined me-1">add_circle</i>
+                            Generate New Wallet
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Transactions Modal -->
+<div class="modal fade" id="transactionsModal" tabindex="-1" aria-labelledby="transactionsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transactionsModalLabel">
+                    <i class="material-icons-outlined text-info me-2">receipt_long</i>
+                    Transaction History
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center text-muted py-4">
+                    <i class="material-icons-outlined fs-1">receipt_long</i>
+                    <p class="mt-2">No transactions found</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Referral Modal -->
+<div class="modal fade" id="referralModal" tabindex="-1" aria-labelledby="referralModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="referralModalLabel">
+                    <i class="material-icons-outlined text-success me-2">share</i>
+                    Refer Friends
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center py-4">
+                    <i class="material-icons-outlined text-success fs-1">share</i>
+                    <h6 class="mt-2">Referral Program</h6>
+                    <p class="text-muted">Earn rewards by referring friends to our platform</p>
+                    <div class="alert alert-info">
+                        <strong>Your Referral Code:</strong> {{ user.username|upper }}
+                    </div>
+                    <button class="btn btn-success" onclick="copyReferralCode()">
+                        <i class="material-icons-outlined me-1">content_copy</i>
+                        Copy Referral Code
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Support Modal -->
+<div class="modal fade" id="supportModal" tabindex="-1" aria-labelledby="supportModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="supportModalLabel">
+                    <i class="material-icons-outlined text-info me-2">support_agent</i>
+                    Get Support
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center py-4">
+                    <i class="material-icons-outlined text-info fs-1">support_agent</i>
+                    <h6 class="mt-2">Need Help?</h6>
+                    <p class="text-muted">Our support team is here to help you</p>
+                    <div class="d-grid gap-2">
+                        <a href="mailto:support@example.com" class="btn btn-outline-info">
+                            <i class="material-icons-outlined me-1">email</i>
+                            Email Support
+                        </a>
+                        <a href="tel:+1234567890" class="btn btn-outline-info">
+                            <i class="material-icons-outlined me-1">phone</i>
+                            Call Support
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Interactive Features -->
+<script>
+// Modal functions
+function openKYCDocumentModal() {
+    new bootstrap.Modal(document.getElementById('kycDocumentModal')).show();
+}
+
+function openVideoKYCModal() {
+    new bootstrap.Modal(document.getElementById('videoKYCModal')).show();
+}
+
+function openINRWalletModal() {
+    new bootstrap.Modal(document.getElementById('inrWalletModal')).show();
+}
+
+function openUSDTWalletModal() {
+    new bootstrap.Modal(document.getElementById('usdtWalletModal')).show();
+}
+
+function openTransactionsModal() {
+    new bootstrap.Modal(document.getElementById('transactionsModal')).show();
+}
+
+function openReferralModal() {
+    new bootstrap.Modal(document.getElementById('referralModal')).show();
+}
+
+function openSupportModal() {
+    new bootstrap.Modal(document.getElementById('supportModal')).show();
+}
+
+// Form submission functions
+function submitKYCDocument() {
+    const form = document.getElementById('kycDocumentForm');
+    const formData = new FormData(form);
+    
+    // Show loading state
+    const submitBtn = form.querySelector('button[onclick="submitKYCDocument()"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-1"></i>Uploading...';
+    submitBtn.disabled = true;
+    
+    // Use real KYC API endpoint
+    fetch('/api/v1/kyc/documents/upload/', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Document uploaded successfully!', 'success');
+            form.reset();
+            bootstrap.Modal.getInstance(document.getElementById('kycDocumentModal')).hide();
+        } else {
+            showNotification(data.message || 'Upload failed. Please try again.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Upload failed. Please try again.', 'error');
+    })
+    .finally(() => {
+        // Reset button
+        submitBtn.innerHTML = originalText;
+        submitBtn.disabled = false;
+    });
+}
+
+function startVideoKYC() {
+    // Show loading state
+    const startBtn = document.querySelector('button[onclick="startVideoKYC()"]');
+    const originalText = startBtn.innerHTML;
+    startBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-1"></i>Starting...';
+    startBtn.disabled = true;
+    
+    // Use real Video KYC API endpoint
+    fetch('/api/v1/kyc/video/upload/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            user_id: '{{ user.id }}',
+            session_type: 'live'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Video KYC session started!', 'success');
+            bootstrap.Modal.getInstance(document.getElementById('videoKYCModal')).hide();
+        } else {
+            showNotification(data.message || 'Failed to start video session.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Failed to start video session.', 'error');
+    })
+    .finally(() => {
+        // Reset button
+        startBtn.innerHTML = originalText;
+        startBtn.disabled = false;
+    });
+}
+
+function generateUSDTWallet() {
+    // Show loading state
+    const generateBtn = document.querySelector('button[onclick="generateUSDTWallet()"]');
+    const originalText = generateBtn.innerHTML;
+    generateBtn.innerHTML = '<i class="spinner-border spinner-border-sm me-1"></i>Generating...';
+    generateBtn.disabled = true;
+    
+    // Use real wallet generation API endpoint
+    fetch('/api/v1/wallet/addresses/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            user_id: '{{ user.id }}',
+            chain_type: 'erc20',
+            wallet_type: 'usdt'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('USDT wallet generated successfully!', 'success');
+            
+            // Update wallet status
+            const walletStatus = document.querySelector('#usdtWalletModal .text-info');
+            walletStatus.textContent = 'Active';
+            
+            // Update wallet address if available
+            if (data.wallet_address) {
+                const addressSection = document.querySelector('#usdtWalletModal .text-center.text-muted.py-4');
+                addressSection.innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>Wallet Address:</strong><br>
+                        <code class="small">${data.wallet_address}</code>
+                    </div>
+                    <button class="btn btn-outline-success btn-sm" onclick="copyWalletAddress('${data.wallet_address}')">
+                        <i class="material-icons-outlined me-1">content_copy</i>
+                        Copy Address
+                    </button>
+                `;
+            }
+        } else {
+            showNotification(data.message || 'Failed to generate wallet.', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Failed to generate wallet.', 'error');
+    })
+    .finally(() => {
+        // Reset button
+        generateBtn.innerHTML = originalText;
+        generateBtn.disabled = false;
+    });
+}
+
+function copyReferralCode() {
+    const referralCode = '{{ user.username|upper }}';
+    navigator.clipboard.writeText(referralCode).then(() => {
+        showNotification('Referral code copied to clipboard!', 'success');
+    }).catch(() => {
+        showNotification('Failed to copy referral code', 'error');
+    });
+}
+
+function copyWalletAddress(address) {
+    navigator.clipboard.writeText(address).then(() => {
+        showNotification('Wallet address copied to clipboard!', 'success');
+    }).catch(() => {
+        showNotification('Failed to copy wallet address', 'error');
+    });
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+    notification.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    notification.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    `;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Add click effects to cards
+document.addEventListener('DOMContentLoaded', function() {
+    // Add hover effects
+    const interactiveCards = document.querySelectorAll('.card.border');
+    interactiveCards.forEach(card => {
+        card.style.cursor = 'pointer';
+        card.style.transition = 'all 0.2s ease';
+        
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.boxShadow = '0 10px 25px rgba(0,0,0,0.1)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '0 0.125rem 0.25rem rgba(0,0,0,0.075)';
+        });
+    });
+});
+
+// Wallet Integration Functions
+async function loadWalletBalances() {
+    try {
+        const response = await apiRequest('http://localhost:8000/api/v1/wallet/balance/');
+        const data = await response.json();
+        
+        console.log('Wallet balances received:', data);
+        
+        // Update INR balance using specific ID
+        const inrBalance = document.getElementById('inr-balance');
+        if (inrBalance) {
+            inrBalance.textContent = `₹${parseFloat(data.inr_wallet?.balance || 0).toFixed(2)}`;
+        }
+        
+        // Update USDT balance using specific ID
+        const usdtBalance = document.getElementById('usdt-balance');
+        if (usdtBalance) {
+            usdtBalance.textContent = `${parseFloat(data.usdt_wallet?.balance || 0).toFixed(6)}`;
+        }
+        
+        // Update total earnings using specific ID
+        const totalEarnings = document.getElementById('total-earnings');
+        if (totalEarnings) {
+            totalEarnings.textContent = `₹${parseFloat(data.total_earnings || 0).toFixed(2)}`;
+        }
+        
+        console.log('Wallet balances updated in UI');
+        
+    } catch (error) {
+        console.error('Failed to load wallet balances:', error);
+        showError('Failed to load wallet balances');
+    }
+}
+
+async function loadWalletAddresses() {
+    try {
+        const response = await apiRequest('http://localhost:8000/api/v1/wallet/addresses/');
+        const data = await response.json();
+        
+        // Update USDT wallet addresses in modal and main dashboard
+        if (data.erc20_address) {
+            const addressSection = document.querySelector('#usdtWalletModal .text-center.text-muted.py-4');
+            if (addressSection) {
+                addressSection.innerHTML = `
+                    <div class="alert alert-success">
+                        <strong>ERC20 Address:</strong><br>
+                        <code class="small">${data.erc20_address}</code>
+                    </div>
+                    <div class="alert alert-info mt-2">
+                        <strong>BEP20 Address:</strong><br>
+                        <code class="small">${data.bep20_address || 'Not generated'}</code>
+                    </div>
+                    <button class="btn btn-outline-success btn-sm" onclick="copyWalletAddress('${data.erc20_address}')">
+                        <i class="material-icons-outlined me-1">content_copy</i>
+                        Copy ERC20 Address
+                    </button>
+                `;
+            }
+            
+            // Update main dashboard wallet status
+            const walletStatusElements = document.querySelectorAll('h3, h4');
+            walletStatusElements.forEach(element => {
+                if (element.textContent.includes('Not Generated')) {
+                    element.textContent = 'Generated';
+                    element.className = element.className.replace('text-warning', 'text-success');
+                }
+            });
+            
+            // Update the generate wallet button text
+            const generateButtons = document.querySelectorAll('button[onclick*="generateUSDTWallet"]');
+            generateButtons.forEach(button => {
+                button.innerHTML = '<i class="material-icons-outlined me-1">visibility</i>View Address';
+            });
+        } else {
+            // No wallet addresses yet - show "Generate" option
+            const walletStatusElements = document.querySelectorAll('h3, h4');
+            walletStatusElements.forEach(element => {
+                if (element.textContent.includes('Generated')) {
+                    element.textContent = 'Not Generated';
+                    element.className = element.className.replace('text-success', 'text-warning');
+                }
+            });
+        }
+        
+        console.log('Wallet addresses loaded and UI updated:', data);
+        
+    } catch (error) {
+        console.error('Failed to load wallet addresses:', error);
+    }
+}
+
+async function loadTransactionHistory() {
+    try {
+        const response = await apiRequest('http://localhost:8000/api/v1/wallet/transaction-history/');
+        const data = await response.json();
+        
+        // Update transaction history in modal
+        const modalBody = document.querySelector('#transactionsModal .modal-body');
+        
+        if (data.results && data.results.length > 0) {
+            const table = `
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Currency</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${data.results.map(tx => `
+                                <tr>
+                                    <td>${tx.transaction_type || tx.type || 'Unknown'}</td>
+                                    <td>${tx.amount}</td>
+                                    <td>${tx.currency}</td>
+                                    <td><span class="badge bg-${getStatusBadgeColor(tx.status)}">${tx.status}</span></td>
+                                    <td>${new Date(tx.created_at).toLocaleDateString()}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                </div>
+            `;
+            modalBody.innerHTML = table;
+        } else {
+            modalBody.innerHTML = `
+                <div class="text-center text-muted py-4">
+                    <i class="material-icons-outlined fs-1">receipt_long</i>
+                    <p class="mt-2">No transactions found</p>
+                </div>
+            `;
+        }
+        
+    } catch (error) {
+        console.error('Failed to load transaction history:', error);
+    }
+}
+
+function getStatusBadgeColor(status) {
+    switch(status?.toLowerCase()) {
+        case 'completed':
+        case 'approved':
+        case 'success': return 'success';
+        case 'pending': return 'warning';
+        case 'failed':
+        case 'rejected': return 'danger';
+        default: return 'secondary';
+    }
+}
+
+// KYC Integration Functions
+async function loadKYCStatus() {
+    try {
+        const response = await apiRequest('http://localhost:8000/api/v1/kyc/status/');
+        const data = await response.json();
+        
+        // Update KYC status using specific ID
+        const kycStatus = document.getElementById('kyc-status');
+        if (kycStatus) {
+            const status = data.overall_kyc_status || data.status || 'PENDING';
+            kycStatus.textContent = status;
+            
+            // Update the parent avatar background color based on status
+            const avatar = kycStatus.closest('.card-body').querySelector('.avatar');
+            if (avatar) {
+                avatar.className = avatar.className.replace(/bg-\w+-bg-opacity-10/, '');
+                avatar.classList.add(`bg-${getStatusColor(status)}-bg-opacity-10`);
+                
+                const icon = avatar.querySelector('i');
+                if (icon) {
+                    icon.className = icon.className.replace(/text-\w+/, '');
+                    icon.classList.add(`text-${getStatusColor(status)}`);
+                }
+            }
+        }
+        
+        console.log('KYC status updated:', data);
+        
+    } catch (error) {
+        console.error('Failed to load KYC status:', error);
+        showError('Failed to load KYC status');
+    }
+}
+
+function getStatusColor(status) {
+    switch(status) {
+        case 'APPROVED': return 'success';
+        case 'PENDING': return 'warning';
+        case 'REJECTED': return 'danger';
+        default: return 'secondary';
+    }
+}
+
+// Referral Integration Functions
+async function loadReferralProfile() {
+    try {
+        const response = await apiRequest('http://localhost:8000/api/v1/referrals/profile/');
+        const data = await response.json();
+        
+        // Update referral statistics in the referral modal
+        const referralModal = document.querySelector('#referralModal .modal-body');
+        if (referralModal) {
+            referralModal.innerHTML = `
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h5 class="text-primary">Referral Code</h5>
+                                <h3 class="mb-3">${data.referral_code || 'N/A'}</h3>
+                                <button class="btn btn-outline-primary" onclick="copyReferralCode()">
+                                    <i class="material-icons-outlined me-1">content_copy</i>
+                                    Copy Code
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h5 class="text-success">Total Referrals</h5>
+                                <h3 class="mb-3">${data.total_referrals || 0}</h3>
+                                <p class="text-muted">Active members</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-body text-center">
+                                <h5 class="text-info">Total Earnings</h5>
+                                <h3 class="mb-3">₹${parseFloat(data.total_earnings || 0).toFixed(2)}</h3>
+                                <p class="text-muted">From referral bonuses</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+    } catch (error) {
+        console.error('Failed to load referral profile:', error);
+    }
+}
+
+async function loadReferralTree() {
+    try {
+        const response = await apiRequest('http://localhost:8000/api/v1/referrals/tree/');
+        const data = await response.json();
+        
+        // Build referral tree visualization
+        if (data.tree && data.tree.length > 0) {
+            buildReferralTree(data.tree);
+        } else {
+            // Show no referrals message
+            const treeContainer = document.querySelector('#referralTreeContainer');
+            if (treeContainer) {
+                treeContainer.innerHTML = `
+                    <div class="text-center text-muted py-4">
+                        <i class="material-icons-outlined fs-1">people</i>
+                        <p class="mt-2">No referrals yet. Start inviting friends!</p>
+                    </div>
+                `;
+            }
+        }
+        
+    } catch (error) {
+        console.error('Failed to load referral tree:', error);
+    }
+}
+
+function buildReferralTree(treeData) {
+    // Implementation for building referral tree visualization
+    // This can be enhanced with a proper tree visualization library
+    console.log('Building referral tree:', treeData);
+}
+
+// Investment Integration Functions
+async function loadInvestmentPlans() {
+    try {
+        const response = await apiRequest('http://localhost:8000/api/v1/investment/investment-plans/');
+        const data = await response.json();
+        console.log('Investment Plans:', data);
+        
+        // Update plans section if exists
+        updateInvestmentPlansDisplay(data.results || []);
+    } catch (error) {
+        console.error('Error loading investment plans:', error);
+    }
+}
+
+async function loadUserInvestments() {
+    try {
+        const response = await apiRequest('http://localhost:8000/api/v1/investment/investments/');
+        const data = await response.json();
+        console.log('User Investments:', data);
+        
+        // Update investments display
+        updateUserInvestmentsDisplay(data.results || []);
+    } catch (error) {
+        console.error('Error loading user investments:', error);
+    }
+}
+
+function updateInvestmentPlansDisplay(plans) {
+    // Find investment plans container in dashboard
+    const plansContainer = document.querySelector('.investment-plans-container');
+    if (!plansContainer) return;
+
+    let plansHtml = '<h5>Available Investment Plans</h5>';
+    plans.forEach(plan => {
+        plansHtml += `
+            <div class="card mb-2">
+                <div class="card-body">
+                    <h6>${plan.name}</h6>
+                    <p>ROI: ${plan.roi_rate}% ${plan.frequency}</p>
+                    <p>Duration: ${plan.duration_days} days</p>
+                                            <p>Fixed Amount: ₹${plan.fixed_amount}</p>
+                    <button class="btn btn-primary btn-sm" onclick="purchaseInvestment('${plan.id}')">
+                        Invest Now
+                    </button>
+                </div>
+            </div>
+        `;
+    });
+    plansContainer.innerHTML = plansHtml;
+}
+
+function updateUserInvestmentsDisplay(investments) {
+    // Update investment summary in dashboard
+    const totalInvested = investments.reduce((sum, inv) => sum + parseFloat(inv.amount || 0), 0);
+                const activeInvestments = investments.filter(inv => inv.status?.toLowerCase() === 'active').length;
+    
+    // Update dashboard cards
+    const investmentCard = document.querySelector('.investment-summary');
+    if (investmentCard) {
+        investmentCard.innerHTML = `
+            <h6>Active Investments: ${activeInvestments}</h6>
+            <p>Total Invested: ₹${totalInvested.toFixed(2)}</p>
+        `;
+    }
+}
+
+async function purchaseInvestment(planId) {
+    const amount = prompt('Enter investment amount:');
+    if (!amount) return;
+
+    try {
+        const response = await apiRequest('http://localhost:8000/api/v1/investment/investments/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                plan: planId,
+                amount: amount,
+                currency: 'inr'
+            })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            showSuccess('Investment purchased successfully!');
+            loadWalletBalances();
+            loadUserInvestments();
+        } else {
+            showError(data.error || 'Investment purchase failed');
+        }
+    } catch (error) {
+        console.error('Investment purchase error:', error);
+        showError('Investment purchase failed');
+    }
+}
+
+// Wallet Management Functions
+async function createDepositRequest() {
+    const amount = prompt('Enter deposit amount (INR):');
+    if (!amount) return;
+
+    const bankDetails = {
+        account_number: prompt('Account Number:'),
+        ifsc_code: prompt('IFSC Code:'),
+        account_holder_name: prompt('Account Holder Name:'),
+        bank_name: prompt('Bank Name:')
+    };
+
+    if (!bankDetails.account_number || !bankDetails.ifsc_code) {
+        showError('Please provide all bank details');
+        return;
+    }
+
+    try {
+        const response = await apiRequest('http://localhost:8000/api/v1/deposit-requests/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                currency: 'INR',
+                amount: amount,
+                payment_method: 'bank_transfer',
+                payment_details: bankDetails
+            })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            showSuccess('Deposit request created successfully!');
+            loadTransactionHistory();
+        } else {
+            showError(data.error || 'Deposit request failed');
+        }
+    } catch (error) {
+        console.error('Deposit request error:', error);
+        showError('Deposit request failed');
+    }
+}
+
+async function createWithdrawalRequest() {
+    const amount = prompt('Enter withdrawal amount (INR):');
+    if (!amount) return;
+
+    const bankDetails = {
+        account_number: prompt('Account Number:'),
+        ifsc_code: prompt('IFSC Code:'),
+        account_holder_name: prompt('Account Holder Name:'),
+        bank_name: prompt('Bank Name:')
+    };
+
+    if (!bankDetails.account_number || !bankDetails.ifsc_code) {
+        showError('Please provide all bank details');
+        return;
+    }
+
+    try {
+        const response = await apiRequest('http://localhost:8000/api/v1/withdraw/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                currency: 'INR',
+                amount: amount,
+                payout_method: 'bank_transfer',
+                payout_details: bankDetails
+            })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            showSuccess(`Withdrawal request created! Fee: ₹${data.fee}, Net Amount: ₹${data.net_amount}`);
+            loadWalletBalances();
+            loadTransactionHistory();
+        } else {
+            showError(data.error || 'Withdrawal request failed');
+        }
+    } catch (error) {
+        console.error('Withdrawal request error:', error);
+        showError('Withdrawal request failed');
+    }
+}
+
+// Modal Functions
+function openINRWalletModal() {
+    document.getElementById('inrWalletModal').classList.add('show');
+    document.getElementById('inrWalletModal').style.display = 'block';
+}
+
+function openUSDTWalletModal() {
+    document.getElementById('usdtWalletModal').classList.add('show');
+    document.getElementById('usdtWalletModal').style.display = 'block';
+}
+
+function openTransactionsModal() {
+    document.getElementById('transactionsModal').classList.add('show');
+    document.getElementById('transactionsModal').style.display = 'block';
+}
+
+function openReferralModal() {
+    // Create and show a proper modal for referral information
+    const code = document.querySelector('.referral-code')?.textContent || 'Loading...';
+    const link = `${window.location.origin}/auth/sign-up/?ref=${code}`;
+    
+    // Create modal HTML
+    const modalHTML = `
+        <div class="modal fade" id="referralInfoModal" tabindex="-1" aria-labelledby="referralInfoModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title" id="referralInfoModalLabel">
+                            <i class="material-icons-outlined me-2">share</i>
+                            Referral Program
+                        </h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Your Referral Code</h6>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" value="${code}" id="referralCodeInput" readonly>
+                                    <button class="btn btn-outline-primary" type="button" onclick="copyToClipboard('referralCodeInput')">
+                                        <i class="material-icons-outlined">content_copy</i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Referral Link</h6>
+                                <div class="input-group mb-3">
+                                    <input type="text" class="form-control" value="${link}" id="referralLinkInput" readonly>
+                                    <button class="btn btn-outline-primary" type="button" onclick="copyToClipboard('referralLinkInput')">
+                                        <i class="material-icons-outlined">content_copy</i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-12">
+                                <h6>How it works:</h6>
+                                <ul>
+                                    <li>Share your referral code or link with friends</li>
+                                    <li>When they register and invest, you earn commissions</li>
+                                    <li>Multi-level earnings up to 3 levels deep</li>
+                                    <li>Instant credit to your wallet</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="row" id="referralStatsContainer">
+                            <!-- Referral stats will be loaded here -->
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-success" onclick="shareReferralLink('${link}')">
+                            <i class="material-icons-outlined me-1">share</i>
+                            Share Link
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Remove existing modal if any
+    const existingModal = document.getElementById('referralInfoModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+    
+    // Add modal to page
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('referralInfoModal'));
+    modal.show();
+    
+    // Load referral statistics
+    loadReferralStatistics();
+}
+
+function copyToClipboard(inputId) {
+    const input = document.getElementById(inputId);
+    input.select();
+    document.execCommand('copy');
+    showSuccess('Copied to clipboard!');
+}
+
+function shareReferralLink(link) {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Join our Investment Platform',
+            text: 'Join me on this amazing investment platform and start earning!',
+            url: link
+        });
+    } else {
+        // Fallback - copy to clipboard
+        navigator.clipboard.writeText(link);
+        showSuccess('Referral link copied to clipboard!');
+    }
+}
+
+async function loadReferralStatistics() {
+    try {
+        const response = await apiRequest('http://localhost:8000/api/v1/referrals/profile/');
+        const data = await response.json();
+        
+        const statsContainer = document.getElementById('referralStatsContainer');
+        if (statsContainer) {
+            statsContainer.innerHTML = `
+                <div class="col-md-3">
+                    <div class="card bg-primary text-white">
+                        <div class="card-body text-center">
+                            <h4>${data.total_referrals || 0}</h4>
+                            <small>Total Referrals</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-success text-white">
+                        <div class="card-body text-center">
+                            <h4>₹${data.total_earnings || '0.00'}</h4>
+                            <small>Total Earnings</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-info text-white">
+                        <div class="card-body text-center">
+                            <h4>${data.active_referrals || 0}</h4>
+                            <small>Active Referrals</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card bg-warning text-white">
+                        <div class="card-body text-center">
+                            <h4>${data.monthly_earnings || '0.00'}</h4>
+                            <small>This Month</small>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading referral statistics:', error);
+    }
+}
+
+function openSupportModal() {
+    alert('Support Feature - Contact admin for assistance');
+}
+
+async function generateUSDTWallet() {
+    try {
+        const response = await apiRequest('http://localhost:8000/api/v1/wallet/addresses/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                currency: 'USDT'
+            })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            showSuccess('USDT wallet generated successfully!');
+            loadWalletAddresses();
+        } else {
+            showError(data.error || 'Wallet generation failed');
+        }
+    } catch (error) {
+        console.error('Wallet generation error:', error);
+        showError('Wallet generation failed');
+    }
+}
+
+// KYC Upload Functions
+function submitKYCDocumentForm() {
+    const form = document.getElementById('kycDocumentForm');
+    const formData = new FormData();
+    
+    const documentType = document.getElementById('documentType').value;
+    const documentNumber = document.getElementById('documentNumber').value;
+    const documentFile = document.getElementById('documentFile').files[0];
+    
+    if (!documentType || !documentFile) {
+        showError('Please provide document type and file');
+        return;
+    }
+    
+    // Show loading state
+    const submitButton = document.querySelector('button[onclick="submitKYCDocumentForm()"]');
+    const originalText = submitButton.innerHTML;
+    submitButton.innerHTML = '<i class="material-icons-outlined me-1">hourglass_empty</i>Uploading...';
+    submitButton.disabled = true;
+    
+    formData.append('document_type', documentType);
+    formData.append('document_number', documentNumber);
+    formData.append('document_file', documentFile);
+    
+    fetch('http://localhost:8000/api/v1/kyc/documents/upload/', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${AuthManager.getAccessToken()}`
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(err => Promise.reject(err));
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.id) {
+            showSuccess('KYC document uploaded successfully!');
+            loadKYCStatus();
+            // Close modal
+            const modal = document.getElementById('kycDocumentModal');
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            // Reset form
+            form.reset();
+        } else {
+            showError(data.error || 'KYC upload failed');
+        }
+    })
+    .catch(error => {
+        console.error('KYC upload error:', error);
+        
+        // Handle specific error cases
+        if (error.detail) {
+            showError(error.detail);
+        } else if (error.non_field_errors) {
+            showError(error.non_field_errors[0]);
+        } else if (typeof error === 'string' && error.includes('duplicate key')) {
+            showError('You have already uploaded this type of document. Please contact support to update it.');
+        } else {
+            showError(error.message || 'KYC upload failed. Please try again.');
+        }
+    })
+    .finally(() => {
+        // Restore button state
+        submitButton.innerHTML = originalText;
+        submitButton.disabled = false;
+    });
+}
+
+function startVideoKYC() {
+    alert('Video KYC feature - This would integrate with video calling service');
+}
+
+// Helper function to copy wallet address
+function copyWalletAddress(address) {
+    navigator.clipboard.writeText(address).then(() => {
+        showSuccess('Wallet address copied to clipboard!');
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        showError('Failed to copy address');
+    });
+}
+
+// Helper functions for showing success/error messages
+function showSuccess(message) {
+    // Create success alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        <i class="material-icons-outlined me-2">check_circle</i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+function showError(message) {
+    // Create error alert
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        <i class="material-icons-outlined me-2">error</i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    // Auto-remove after 7 seconds
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 7000);
+}
+
+// KYC Upload Function (legacy)
+async function uploadKYCDocument() {
+    const documentType = prompt('Document Type (PAN/AADHAAR/PASSPORT/DRIVING_LICENSE/VOTER_ID):');
+    const documentNumber = prompt('Document Number:');
+    
+    if (!documentType || !documentNumber) {
+        showError('Please provide document type and number');
+        return;
+    }
+
+    const fileInput = document.createElement('input');
+    fileInput.type = 'file';
+    fileInput.accept = '.pdf,.jpg,.jpeg,.png';
+    
+    fileInput.onchange = async function(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const formData = new FormData();
+        formData.append('document_type', documentType.toUpperCase());
+        formData.append('document_number', documentNumber);
+        formData.append('document_file', file);
+
+        try {
+            const response = await fetch('http://localhost:8000/api/v1/kyc/documents/upload/', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${AuthManager.getAccessToken()}`
+                },
+                body: formData
+            });
+
+            const data = await response.json();
+            if (response.ok) {
+                showSuccess('KYC document uploaded successfully!');
+                loadKYCStatus();
+            } else {
+                showError(data.error || 'KYC upload failed');
+            }
+        } catch (error) {
+            console.error('KYC upload error:', error);
+            showError('KYC upload failed');
+        }
+    };
+
+    fileInput.click();
+}
+
+// Load data on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadWalletBalances();
+    loadKYCStatus();
+    loadTransactionHistory();
+    loadWalletAddresses();
+    loadReferralProfile();
+    loadReferralTree();
+    loadInvestmentPlans();
+    loadUserInvestments();
+});
+</script>
+
+{% endblock %}

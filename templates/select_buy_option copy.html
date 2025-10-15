@@ -1,0 +1,121 @@
+{% extends 'user_menu.html' %}
+{% load static %}
+{% block main %}
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<main class="main-wrapper">
+  <div class="main-content">
+    <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+      <div class="breadcrumb-title pe-3">Buy Plan</div>
+    </div>
+
+    <div class="card shadow-sm p-4">
+      <h4 class="fw-bold">Select a payment method for: <span class="text-primary">{{ plan.package_name }}</span></h4>
+      <p class="mb-3">Amount: <strong>USDT {{ plan.package_amount }}</strong></p>
+
+      <div class="row">
+        <!-- Buy with Admin Request -->
+        <div class="col-md-4 mb-3">
+          <button class="btn btn-outline-primary w-100 py-3 d-flex align-items-center justify-content-center gap-2"
+            data-bs-toggle="modal" data-bs-target="#buyAdminModal">
+            <span class="material-icons">supervisor_account</span>
+            <span class="fw-semibold">Request Admin To Buy</span>
+          </button>
+
+        </div>
+        <!-- Buy with E-PIN Button -->
+<div class="col-md-4 mb-3">
+  <button class="btn btn-outline-success w-100 py-3 d-flex align-items-center justify-content-center gap-2"
+    data-bs-toggle="modal" data-bs-target="#buyEpinModal">
+    <span class="material-icons">vpn_key</span>
+    <span class="fw-semibold">Use E-PIN</span>
+  </button>
+</div>
+
+        <!-- Buy with USDT Button -->
+        <div class="col-md-4 mb-3">
+          <button class="btn btn-outline-warning w-100 py-3 d-flex align-items-center justify-content-center gap-2"
+            data-bs-toggle="modal" data-bs-target="#buyUsdtModal">
+            <span class="material-icons">currency_bitcoin</span>
+            <span class="fw-semibold">Pay with USDT</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+
+<!-- Buy with Admin Request Modal -->
+<div class="modal fade" id="buyAdminModal" tabindex="-1" aria-labelledby="buyAdminModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'buy_with_admin' plan.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="buyAdminModalLabel">
+            Buy with Admin
+          </h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Are you sure you want to request Admin to buy <strong>{{ plan.package_name }}</strong>?
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">
+            <i class="material-icons align-middle">send</i> Send Request
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- E-PIN Modal (make sure plan is passed in context) -->
+<div class="modal fade" id="buyEpinModal" tabindex="-1" aria-labelledby="buyEpinModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'buy_with_epin' plan.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title">Buy with E-PIN</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" name="epin_code" class="form-control" placeholder="Enter E-PIN Code" required>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-success">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+<!-- Buy with USDT Button -->
+<div class="modal fade" id="buyUsdtModal" tabindex="-1" aria-labelledby="buyUsdtModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="POST" action="{% url 'buy_with_usdt' plan.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="buyUsdtModalLabel">Buy with USDT</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>Send <strong>{{ plan.package_amount }} USDT</strong> to:</p>
+          <div class="alert alert-dark">
+            Wallet Address: <strong>TRX123abc...</strong>
+          </div>
+          <input type="text" name="tx_hash" class="form-control" placeholder="Enter Transaction ID" required>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-warning">Submit TX ID</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

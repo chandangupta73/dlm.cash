@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+<main>
+    <section class="breadcrumb-area breadcrumb-bg">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="breadcrumb-content">
+                        <h2 class="title">Blog & Article</h2>
+                        <nav aria-label="Breadcrumbs">
+                            <ul class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                                <li class="breadcrumb-item"><a href="#">{{ category.category }}</a></li>
+                                <li class="breadcrumb-item active"><span>{{ subcategory.sub_category }}</span></li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section style="background-color: white;" class="blog-area pt-130 pb-130">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    {% for blog in blogs %}
+                    <div class="blog-post-item">
+                        <div class="blog-post-thumb">
+                            <a href="{% url 'blogdetails' category_slug=blog.blog_category.category.slug subcategory_slug=blog.blog_category.slug blog_slug=blog.slug %}"><img src="{{ blog.blog_image.url }}" alt=""></a>
+                        </div>
+                        <div class="blog-post-content">
+                            <div class="blog-meta">
+                                <ul>
+                                    <li><i class="far fa-user"></i>{{ blog.author.full_name|default:"Unknown Author"|capfirst }}</li>
+                                    <li><i class="far fa-clock"></i>{{ blog.blog_date}}</li>
+                                </ul>
+                            </div>
+                            <h2 class="title"><a href="{% url 'blogdetails' category_slug=blog.blog_category.category.slug subcategory_slug=blog.blog_category.slug blog_slug=blog.slug %}">{{ blog.blog_title }}</a></h2>
+                            <p>{{ blog.blog_short_des }}</p>
+                            <a href="{% url 'blogdetails' category_slug=blog.blog_category.category.slug subcategory_slug=blog.blog_category.slug blog_slug=blog.slug %}" class="btn btn-two">Read more <i
+                                    class="fas fa-arrow-right"></i></a>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="pagination-wrap">
+                        <ul class="list-wrap">
+                            {% if page_obj.has_previous %}
+                            <li class="prv-next">
+                                <a href="?page={{ page_obj.previous_page_number }}">
+                                    <i class="fas fa-angle-double-left"></i>
+                                </a>
+                            </li>
+                            {% else %}
+                            <li class="prv-next disabled">
+                                <span><i class="fas fa-angle-double-left"></i></span>
+                            </li>
+                            {% endif %}
+
+                            {% for page_num in page_obj.paginator.page_range %}
+                            {% if page_num == page_obj.number %}
+                            <li><a href="?page={{ page_num }}" class="current">{{ page_num }}</a></li>
+                            {% elif page_num >= page_obj.number|add:'-2' and page_num <= page_obj.number|add:'2' %} <li>
+                                <a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                                {% elif page_num == 1 or page_num == page_obj.paginator.num_pages %}
+                                <li><a href="?page={{ page_num }}">{{ page_num }}</a></li>
+                                {% elif page_num == page_obj.number|add:'-3' or page_num == page_obj.number|add:'3' %}
+                                <li><a href="#">...</a></li>
+                                {% endif %}
+                                {% endfor %}
+
+                                {% if page_obj.has_next %}
+                                <li class="prv-right">
+                                    <a href="?page={{ page_obj.next_page_number }}">
+                                        <i class="fas fa-angle-double-right"></i>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="prv-right disabled">
+                                    <span><i class="fas fa-angle-double-right"></i></span>
+                                </li>
+                                {% endif %}
+                        </ul>
+                    </div>
+                </div>
+                {% include 'right_colum.html' %}
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

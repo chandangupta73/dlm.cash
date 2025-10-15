@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block body %}
+
+
+<main>
+    <section style="background: white;" class="blog-details-area pt-4">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8">
+                    <div class="blog-post-item blog-details-wrap">
+                        <div class="blog-post-thumb">
+                            <img src="{{ blog.blog_image.url }}" alt="">
+                        </div>
+                        <div class="blog-post-content">
+                            <div class="blog-meta">
+                                <ul>
+                                    <li><i class="far fa-user"></i>{{ blog.author.full_name|default:"Unknown Author"|capfirst }}</li>
+                                    <li><i class="far fa-clock"></i>{{ blog.blog_date}}</li>
+                                </ul>
+                            </div>
+                            <h2 class="title">{{ blog.blog_title }}</h2>
+                            <p>{{ blog.blog_des|safe }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% include 'right_colum.html' %}
+            </div>
+        </div>
+    </section>
+</main>
+{% endblock %}

@@ -1,0 +1,338 @@
+{% extends 'user_menu.html' %}
+{% load static %}
+{% block main %}
+<!-- Load auth.js for JWT management -->
+<script src="{% static 'assets/js/auth.js' %}"></script>
+<!--start main wrapper-->
+<main class="main-wrapper">
+    <div class="main-content">
+        <!--breadcrumb-->
+        <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+            <div class="breadcrumb-title pe-3">Plans</div>
+            <div class="ps-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 p-0">
+                        <li class="breadcrumb-item"><a href="javascript:;"><i class="bx bx-home-alt"></i></a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Available Investment Plans</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+
+
+        <div class="row" id="plansContainer">
+            <!-- Plans will be loaded dynamically from backend API -->
+            <div class="col-12 text-center">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-2">Loading investment plans...</p>
+            </div>
+        </div>
+
+    </div>
+</main>
+<!--end main wrapper-->
+
+<!-- Investment System Integration JavaScript -->
+<script>
+// Load investment plans from backend API
+async function loadInvestmentPlans() {
+    try {
+        const response = await fetch('/api/v1/investment/investment-plans/');
+        const data = await response.json();
+        
+        const plansContainer = document.getElementById('plansContainer');
+        
+        if (data.results && data.results.length > 0) {
+            plansContainer.innerHTML = '';
+            
+            data.results.forEach(plan => {
+                const planCard = `
+                    <div class="col-md-4 mb-4">
+                        <div class="card shadow-sm text-white" style="background-color: #02131f; border-radius: 15px;">
+                            <div class="card-body">
+                                <h6 class="fw-bold">Investment</h6>
+                                <h3 class="fw-bold mb-3">USDT ${parseFloat(plan.fixed_amount || 0).toFixed(2)}</h3>
+                                
+                                <div class="d-flex justify-content-between mb-2">
+                                    <div>
+                                        <small>Package</small><br>
+                                        <strong>${plan.name || 'Standard Plan'}</strong>
+                                    </div>
+                                    <div>
+                                        <small>Duration (Days)</small><br>
+                                        <strong>${plan.duration_days || 0}</strong>
+                                    </div>
+                                </div>
+                                
+                                <p class="mb-1"><strong>ROI:</strong> ${plan.roi_rate || 0}%</p>
+                                <p class="mb-1"><strong>Type:</strong> ${plan.plan_type || 'Standard'}</p>
+                                <p class="mb-1"><strong>Status:</strong> 
+                                    <span class="text-${plan.is_active ? 'light' : 'warning'}">
+                                        ${plan.is_active ? 'Active' : 'Inactive'}
+                                    </span>
+                                </p>
+                                
+                                <div class="d-grid">
+                                    <button onclick="selectPlan(${plan.id})" class="btn btn-success fw-bold rounded-pill">
+                                        Buy Now
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                plansContainer.innerHTML += planCard;
+            });
+        } else {
+            plansContainer.innerHTML = `
+                <div class="col-12">
+                    <div class="alert alert-info">No investment plans available at the moment.</div>
+                </div>
+            `;
+        }
+        
+    } catch (error) {
+        console.error('Failed to load investment plans:', error);
+        document.getElementById('plansContainer').innerHTML = `
+            <div class="col-12">
+                <div class="alert alert-danger">Failed to load investment plans. Please try again later.</div>
+            </div>
+        `;
+    }
+}
+
+// Handle plan selection and investment
+async function selectPlan(planId) {
+    // Check if user is authenticated
+    if (!AuthManager.isAuthenticated()) {
+        showError('Please login to invest');
+        window.location.href = '/auth/login/';
+        return;
+    }
+
+    try {
+        // First get the plan details
+        const plansResponse = await apiRequest('/api/v1/investment/investment-plans/');
+        const plansData = await plansResponse.json();
+        const plan = plansData.results.find(p => p.id == planId);
+        
+        if (!plan) {
+            showError('Plan not found');
+            return;
+        }
+
+        // Get investment amount from user
+        const amount = prompt(`Investment Amount for ${plan.name}:\nFixed Amount: ₹${plan.fixed_amount}\n\nEnter amount:`);
+        
+        if (!amount) return;
+
+        const investmentAmount = parseFloat(amount);
+        
+        // Validate amount
+        if (isNaN(investmentAmount) || investmentAmount !== parseFloat(plan.fixed_amount)) {
+            showError(`Investment amount must be exactly ₹${plan.fixed_amount} for this plan`);
+            return;
+        }
+
+        // Confirm investment
+        if (!confirm(`Confirm investment of ₹${investmentAmount} in ${plan.name}?`)) {
+            return;
+        }
+
+        const response = await apiRequest('/api/v1/investment/investments/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                plan: planId,
+                amount: investmentAmount.toString(),
+                currency: 'inr'
+            })
+        });
+
+        const data = await response.json();
+        if (response.ok) {
+            showSuccess(`Investment of ₹${investmentAmount} in ${plan.name} successful!\nStart Date: ${new Date(data.start_date).toLocaleDateString()}\nMaturity: ${new Date(data.maturity_date).toLocaleDateString()}`);
+            
+            // Redirect to dashboard after successful investment
+            setTimeout(() => {
+                window.location.href = '/auth/dashboard/';
+            }, 3000);
+        } else {
+            showError(data.error || Object.values(data)[0] || 'Investment failed');
+        }
+    } catch (error) {
+        console.error('Investment error:', error);
+        showError('Investment failed. Please try again.');
+    }
+}
+
+// Notification functions
+function showSuccess(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px; white-space: pre-line;';
+    alertDiv.innerHTML = `
+        <i class="material-icons-outlined me-2">check_circle</i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 5000);
+}
+
+function showError(message) {
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'alert alert-danger alert-dismissible fade show position-fixed';
+    alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    alertDiv.innerHTML = `
+        <i class="material-icons-outlined me-2">error</i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(alertDiv);
+    
+    setTimeout(() => {
+        if (alertDiv.parentNode) {
+            alertDiv.remove();
+        }
+    }, 7000);
+}
+
+// Load investment plans from API
+async function loadInvestmentPlans() {
+    try {
+        console.log('Loading investment plans...');
+        const response = await apiRequest('/api/v1/investment/investment-plans/');
+        console.log('API Response status:', response.status);
+        
+        if (!response.ok) {
+            console.error('API Error:', response.status, response.statusText);
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('Plans received:', data);
+        
+        const plans = data.results || data;
+        
+        if (plans && plans.length > 0) {
+            console.log('Displaying', plans.length, 'plans');
+            displayPlans(plans);
+        } else {
+            console.log('No plans found, showing message');
+            showNoPlansMessage();
+        }
+    } catch (error) {
+        console.error('Error loading plans:', error);
+        showErrorMessage(error.message);
+    }
+}
+
+function displayPlans(plans) {
+    const container = document.getElementById('plansContainer');
+    let html = '';
+    
+    plans.forEach(plan => {
+        html += `
+            <div class="col-xl-4 col-lg-6 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <h5 class="card-title">${plan.name}</h5>
+                            <span class="badge bg-success">Active</span>
+                        </div>
+                        
+                        <div class="text-center mb-3">
+                            <h2 class="text-primary">${plan.roi_rate}%</h2>
+                            <p class="text-muted">${plan.frequency} ROI</p>
+                        </div>
+                        
+                        <div class="plan-details mb-3">
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Duration:</span>
+                                <strong>${plan.duration_days} days</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Min Amount:</span>
+                                <strong>₹${parseFloat(plan.fixed_amount).toFixed(2)}</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Fixed Amount:</span>
+                                <strong>Fixed Amount:</strong>
+                            </div>
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Breakdown Window:</span>
+                                <strong>${plan.breakdown_window_days} days</strong>
+                            </div>
+                        </div>
+                        
+                        ${plan.description ? `<p class="text-muted small mb-3">${plan.description}</p>` : ''}
+                        
+                        <div class="d-grid">
+                            <a href="/investment/buy/${plan.id}/" class="btn btn-primary">
+                                <i class="material-icons-outlined me-1">shopping_cart</i>
+                                Buy Now
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    container.innerHTML = html;
+}
+
+function showNoPlansMessage() {
+    const container = document.getElementById('plansContainer');
+    container.innerHTML = `
+        <div class="col-12 text-center">
+            <div class="card">
+                <div class="card-body py-5">
+                    <i class="material-icons-outlined text-muted" style="font-size: 64px;">trending_up</i>
+                    <h4 class="text-muted mt-3">No Investment Plans Available</h4>
+                    <p class="text-muted">Investment plans will appear here when they become available.</p>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function showErrorMessage(message) {
+    const container = document.getElementById('plansContainer');
+    container.innerHTML = `
+        <div class="col-12 text-center">
+            <div class="card border-danger">
+                <div class="card-body py-5">
+                    <i class="material-icons-outlined text-danger" style="font-size: 64px;">error</i>
+                    <h4 class="text-danger mt-3">Error Loading Plans</h4>
+                    <p class="text-muted">${message}</p>
+                    <button class="btn btn-primary" onclick="loadInvestmentPlans()">
+                        <i class="material-icons-outlined me-1">refresh</i>
+                        Retry
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+
+
+// Load plans on page load
+document.addEventListener('DOMContentLoaded', function() {
+    loadInvestmentPlans();
+});
+</script>
+
+{% endblock %}

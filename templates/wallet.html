@@ -1,0 +1,982 @@
+{% extends 'user_menu.html' %}
+{% load static %}
+{% block main %}
+<!-- Load auth.js for JWT management -->
+<script src="{% static 'assets/js/auth.js' %}"></script>
+
+<!--start main wrapper-->
+<main class="main-wrapper">
+    <div class="main-content">
+        <!--breadcrumb-->
+        <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+            <div class="breadcrumb-title pe-3">Wallets</div>
+            <div class="ps-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 p-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="bx bx-home-alt"></i></a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Wallet Management</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <!--end breadcrumb-->
+
+        <!-- Wallet Overview -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0">
+                            <i class="material-icons-outlined me-2">account_balance</i>
+                            INR Wallet
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <h2 class="text-primary mb-1" id="inr-balance">₹0.00</h2>
+                            <p class="text-muted mb-0">Available Balance</p>
+                            <div class="badge bg-success mt-2" id="inr-status">Active</div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mb-4">
+                            <button class="btn btn-primary" onclick="openDepositModal()">
+                                <i class="material-icons-outlined me-2">add</i>Deposit Funds
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="openWithdrawModal()">
+                                <i class="material-icons-outlined me-2">send</i>Withdraw Funds
+                            </button>
+                        </div>
+
+                        <hr>
+                        
+                        <div id="inr-recent-transactions">
+                            <h6 class="mb-3">Recent INR Transactions</h6>
+                            <div class="text-center text-muted py-3">
+                                <i class="material-icons-outlined fs-1">hourglass_empty</i>
+                                <p>Loading transactions...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">
+                            <i class="material-icons-outlined me-2">currency_bitcoin</i>
+                            USDT Wallet
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-4">
+                            <h2 class="text-success mb-1" id="usdt-balance">0.000000</h2>
+                            <p class="text-muted mb-0">Available Balance</p>
+                            <div class="badge bg-success mt-2" id="usdt-status">Active</div>
+                        </div>
+                        
+
+
+                        <div id="usdt-wallet-addresses" class="mb-4">
+                            <h6 class="mb-3">Wallet Addresses</h6>
+                            <div class="text-center text-muted py-3">
+                                <i class="material-icons-outlined fs-1">hourglass_empty</i>
+                                <p>Loading addresses...</p>
+                            </div>
+                        </div>
+
+                        <hr>
+                        
+                        <div id="usdt-recent-transactions">
+                            <h6 class="mb-3">Recent USDT Transactions</h6>
+                            <div class="text-center text-muted py-3">
+                                <i class="material-icons-outlined fs-1">hourglass_empty</i>
+                                <p>Loading transactions...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Transaction History -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">
+                                <i class="material-icons-outlined me-2">receipt_long</i>
+                                Complete Transaction History
+                            </h5>
+                            <div class="d-flex gap-2">
+                                <select class="form-select form-select-sm" id="currency-filter">
+                                    <option value="">All Currencies</option>
+                                    <option value="INR">INR Only</option>
+                                    <option value="USDT">USDT Only</option>
+                                </select>
+                                <select class="form-select form-select-sm" id="transaction-filter">
+                                    <option value="">All Types</option>
+                                    <option value="DEPOSIT">Deposits</option>
+                                    <option value="WITHDRAWAL">Withdrawals</option>
+                                    <option value="INVESTMENT">Investments</option>
+                                    <option value="ROI">ROI Credits</option>
+                                    <option value="REFERRAL">Referral Bonuses</option>
+                                </select>
+                                <button class="btn btn-sm btn-primary" onclick="refreshTransactions()">
+                                    <i class="material-icons-outlined">refresh</i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="exportTransactions()">
+                                    <i class="material-icons-outlined">download</i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="transactions-list">
+                            <div class="text-center text-muted py-4">
+                                <i class="material-icons-outlined fs-1">hourglass_empty</i>
+                                <p>Loading transaction history...</p>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-center mt-3">
+                            <nav id="transaction-pagination">
+                                <!-- Pagination will be loaded here -->
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<!--end main wrapper-->
+
+<!-- Deposit Modal -->
+<div class="modal fade" id="depositModal" tabindex="-1" aria-labelledby="depositModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="depositModalLabel">
+                    <i class="material-icons-outlined text-primary me-2">add</i>
+                    Create Deposit Request
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="depositForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="depositCurrency" class="form-label">Currency *</label>
+                                <select class="form-select" id="depositCurrency" name="currency" required>
+                                    <option value="INR">INR (Indian Rupee)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="depositAmount" class="form-label">Amount *</label>
+                                <input type="number" class="form-control" id="depositAmount" name="amount" min="100" step="0.01" required>
+                                <div class="form-text">Minimum deposit: ₹100</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="paymentMethod" class="form-label">Payment Method *</label>
+                        <select class="form-select" id="paymentMethod" name="payment_method" required>
+                            <option value="">Select Payment Method</option>
+                            <option value="bank_transfer">Bank Transfer</option>
+                            <option value="upi">UPI Payment</option>
+                        </select>
+                    </div>
+                    
+                    <div id="bankDetails" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="material-icons-outlined me-2">info</i>
+                            Please provide your bank details for verification and faster processing.
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="accountNumber" class="form-label">Account Number *</label>
+                                <input type="text" class="form-control" id="accountNumber" name="account_number">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="ifscCode" class="form-label">IFSC Code *</label>
+                                <input type="text" class="form-control" id="ifscCode" name="ifsc_code" style="text-transform: uppercase;">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="accountHolderName" class="form-label">Account Holder Name *</label>
+                                <input type="text" class="form-control" id="accountHolderName" name="account_holder_name">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="bankName" class="form-label">Bank Name *</label>
+                                <input type="text" class="form-control" id="bankName" name="bank_name">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="submitDeposit()">
+                    <i class="material-icons-outlined me-1">send</i>Submit Request
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Withdraw Modal -->
+<div class="modal fade" id="withdrawModal" tabindex="-1" aria-labelledby="withdrawModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="withdrawModalLabel">
+                    <i class="material-icons-outlined text-danger me-2">send</i>
+                    Create Withdrawal Request
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-warning">
+                    <i class="material-icons-outlined me-2">warning</i>
+                    <strong>Important:</strong> Withdrawal fees may apply. Please ensure your bank details are correct as transfers cannot be reversed.
+                </div>
+                
+                <form id="withdrawForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="withdrawCurrency" class="form-label">Currency *</label>
+                                <select class="form-select" id="withdrawCurrency" name="currency" required onchange="handleCurrencyChange()">
+                                    <option value="INR">INR (Indian Rupee)</option>
+                                    <option value="USDT">USDT (Tether)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="withdrawAmount" class="form-label">Amount *</label>
+                                <input type="number" class="form-control" id="withdrawAmount" name="amount" min="100" step="0.01" required>
+                                <div class="form-text" id="minWithdrawText">Minimum withdrawal: ₹100</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="withdrawPayoutMethod" class="form-label">Payout Method *</label>
+                        <select class="form-select" id="withdrawPayoutMethod" name="payout_method" required onchange="handlePayoutMethodChange()">
+                            <option value="">Select Payout Method</option>
+                            <option value="bank_transfer" data-currency="INR">Bank Transfer (INR)</option>
+                            <option value="usdt_wallet" data-currency="USDT">USDT Wallet</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Bank Details Section -->
+                    <div id="withdrawBankDetails" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="material-icons-outlined me-2">account_balance</i>
+                            Funds will be transferred to the bank account below. Please ensure details are accurate.
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="withdrawAccountNumber" class="form-label">Account Number *</label>
+                                <input type="text" class="form-control" id="withdrawAccountNumber" name="account_number" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="withdrawIfscCode" class="form-label">IFSC Code *</label>
+                                <input type="text" class="form-control" id="withdrawIfscCode" name="ifsc_code" style="text-transform: uppercase;" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="withdrawAccountHolderName" class="form-label">Account Holder Name *</label>
+                                <input type="text" class="form-control" id="withdrawAccountHolderName" name="account_holder_name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="withdrawBankName" class="form-label">Bank Name *</label>
+                                <input type="text" class="form-control" id="withdrawBankName" name="bank_name" required>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- USDT Wallet Section -->
+                    <div id="withdrawUSDTDetails" style="display: none;">
+                        <div class="alert alert-info">
+                            <i class="material-icons-outlined me-2">account_balance_wallet</i>
+                            USDT will be sent to your registered wallet address. Please ensure your USDT details are verified.
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="withdrawNetwork" class="form-label">Network</label>
+                                <input type="text" class="form-control" id="withdrawNetwork" name="network" readonly>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="withdrawWalletAddress" class="form-label">Wallet Address</label>
+                                <input type="text" class="form-control" id="withdrawWalletAddress" name="wallet_address" readonly>
+                            </div>
+                        </div>
+                        <div class="alert alert-warning">
+                            <i class="material-icons-outlined me-2">warning</i>
+                            <strong>Note:</strong> Make sure you have added and verified your USDT wallet details in your profile.
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="submitWithdraw()">
+                    <i class="material-icons-outlined me-1">send</i>Submit Request
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Wallet Page -->
+<script>
+let currentPage = 1;
+let transactionFilter = '';
+let currencyFilter = '';
+
+// Initialize wallet page on load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeWalletPage();
+    setupEventListeners();
+});
+
+function initializeWalletPage() {
+    loadWalletBalances();
+    loadWalletAddresses();
+    loadTransactions();
+    loadRecentTransactions();
+}
+
+function setupEventListeners() {
+    // Payment method change
+    document.getElementById('paymentMethod').addEventListener('change', function() {
+        const bankDetails = document.getElementById('bankDetails');
+        if (this.value === 'bank_transfer') {
+            bankDetails.style.display = 'block';
+            // Make bank fields required
+            ['accountNumber', 'ifscCode', 'accountHolderName', 'bankName'].forEach(id => {
+                document.getElementById(id).required = true;
+            });
+        } else {
+            bankDetails.style.display = 'none';
+            // Remove required attribute
+            ['accountNumber', 'ifscCode', 'accountHolderName', 'bankName'].forEach(id => {
+                document.getElementById(id).required = false;
+            });
+        }
+    });
+
+    // Transaction filters
+    document.getElementById('transaction-filter').addEventListener('change', function() {
+        transactionFilter = this.value;
+        currentPage = 1;
+        loadTransactions();
+    });
+
+    document.getElementById('currency-filter').addEventListener('change', function() {
+        currencyFilter = this.value;
+        currentPage = 1;
+        loadTransactions();
+    });
+}
+
+// API Integration Functions
+async function loadWalletBalances() {
+    try {
+        const response = await apiRequest('/api/v1/wallet/balance/');
+        const data = await response.json();
+        
+        if (response.ok) {
+            // Update balance displays
+            const inrBalance = parseFloat(data.inr_wallet?.balance || 0).toFixed(2);
+            const usdtBalance = parseFloat(data.usdt_wallet?.balance || 0).toFixed(6);
+            
+            document.getElementById('inr-balance').textContent = `₹${inrBalance}`;
+            document.getElementById('usdt-balance').textContent = usdtBalance;
+            
+            // Update status
+            document.getElementById('inr-status').textContent = data.inr_wallet?.is_active ? 'Active' : 'Inactive';
+            document.getElementById('usdt-status').textContent = data.usdt_wallet?.is_active ? 'Active' : 'Inactive';
+            
+            // Update status colors
+            updateStatusBadge('inr-status', data.inr_wallet?.is_active);
+            updateStatusBadge('usdt-status', data.usdt_wallet?.is_active);
+        } else {
+            throw new Error(data.detail || 'Failed to load wallet balances');
+        }
+    } catch (error) {
+        console.error('Error loading wallet balances:', error);
+        showError('Failed to load wallet balances: ' + error.message);
+    }
+}
+
+async function loadWalletAddresses() {
+    try {
+        const response = await apiRequest('/api/v1/wallet/addresses/');
+        const data = await response.json();
+        
+        const addressDiv = document.getElementById('usdt-wallet-addresses');
+        
+        if (response.ok && (data.erc20 || data.bep20)) {
+            let addressHtml = '';
+            
+            if (data.erc20) {
+                addressHtml += `
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">ERC20 Address (USDT - Ethereum Network)</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" value="${data.erc20}" readonly>
+                            <button class="btn btn-outline-success" onclick="copyToClipboard('${data.erc20}')">
+                                <i class="material-icons-outlined">content_copy</i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (data.bep20) {
+                addressHtml += `
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">BEP20 Address (USDT - BSC Network)</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" value="${data.bep20}" readonly>
+                            <button class="btn btn-outline-success" onclick="copyToClipboard('${data.bep20}')">
+                                <i class="material-icons-outlined">content_copy</i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            addressDiv.innerHTML = `
+                <h6 class="mb-3">Your USDT Wallet Addresses</h6>
+                ${addressHtml}
+                <div class="alert alert-info">
+                    <i class="material-icons-outlined me-2">info</i>
+                    <small>Use these addresses to deposit USDT to your wallet. Only send USDT tokens to these addresses.</small>
+                </div>
+            `;
+            
+        } else {
+            addressDiv.innerHTML = `
+                <h6 class="mb-3">USDT Wallet Addresses</h6>
+                <div class="text-center text-muted py-3">
+                    <i class="material-icons-outlined fs-1">error_outline</i>
+                    <p>Unable to load wallet addresses. Please contact support if this persists.</p>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading wallet addresses:', error);
+    }
+}
+
+async function loadTransactions(page = 1) {
+    try {
+        let url = `/api/v1/transactions/?page=${page}`;
+        if (transactionFilter) {
+            url += `&transaction_type=${transactionFilter}`;
+        }
+        if (currencyFilter) {
+            url += `&currency=${currencyFilter}`;
+        }
+        
+        const response = await apiRequest(url);
+        const data = await response.json();
+        
+        if (response.ok) {
+            updateTransactionsDisplay(data.results || []);
+            updatePagination(data, 'transaction-pagination');
+        } else {
+            throw new Error(data.detail || 'Failed to load transactions');
+        }
+    } catch (error) {
+        console.error('Error loading transactions:', error);
+        document.getElementById('transactions-list').innerHTML = `
+            <div class="text-center text-danger py-4">
+                <i class="material-icons-outlined fs-1">error</i>
+                <p>Failed to load transactions</p>
+                <button class="btn btn-primary" onclick="loadTransactions()">Try Again</button>
+            </div>
+        `;
+    }
+}
+
+async function loadRecentTransactions() {
+    try {
+        // Load recent INR transactions
+        const inrResponse = await apiRequest('/api/v1/transactions/?currency=INR&limit=5');
+        const inrData = await inrResponse.json();
+        
+        if (inrResponse.ok) {
+            updateRecentTransactions(inrData.results || [], 'inr-recent-transactions', 'INR');
+        }
+        
+        // Load recent USDT transactions
+        const usdtResponse = await apiRequest('/api/v1/transactions/?currency=USDT&limit=5');
+        const usdtData = await usdtResponse.json();
+        
+        if (usdtResponse.ok) {
+            updateRecentTransactions(usdtData.results || [], 'usdt-recent-transactions', 'USDT');
+        }
+    } catch (error) {
+        console.error('Error loading recent transactions:', error);
+    }
+}
+
+// Form Submission Functions
+async function submitDeposit() {
+    const form = document.getElementById('depositForm');
+    const formData = new FormData(form);
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const paymentDetails = {};
+    if (formData.get('payment_method') === 'bank_transfer') {
+        paymentDetails.account_number = formData.get('account_number');
+        paymentDetails.ifsc_code = formData.get('ifsc_code');
+        paymentDetails.account_holder_name = formData.get('account_holder_name');
+        paymentDetails.bank_name = formData.get('bank_name');
+    }
+    
+    const data = {
+        currency: formData.get('currency'),
+        amount: formData.get('amount'),
+        payment_method: formData.get('payment_method'),
+        payment_details: paymentDetails
+    };
+    
+    try {
+        showLoading('Creating deposit request...');
+        const response = await apiRequest('/api/v1/deposit-requests/', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showSuccess('Deposit request created successfully! You will be notified once it\'s approved.');
+            bootstrap.Modal.getInstance(document.getElementById('depositModal')).hide();
+            form.reset();
+            document.getElementById('bankDetails').style.display = 'none';
+            loadWalletBalances();
+            loadTransactions();
+            loadRecentTransactions();
+        } else {
+            throw new Error(result.detail || result.error || 'Deposit request failed');
+        }
+    } catch (error) {
+        console.error('Error submitting deposit:', error);
+        showError('Deposit request failed: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+async function submitWithdraw() {
+    const form = document.getElementById('withdrawForm');
+    const formData = new FormData(form);
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const data = {
+        currency: formData.get('currency'),
+        amount: formData.get('amount'),
+        payout_method: formData.get('payout_method'),
+        payout_details: {
+            account_number: formData.get('account_number'),
+            ifsc_code: formData.get('ifsc_code'),
+            account_holder_name: formData.get('account_holder_name'),
+            bank_name: formData.get('bank_name')
+        }
+    };
+    
+    try {
+        showLoading('Creating withdrawal request...');
+        const response = await apiRequest('/api/v1/withdraw/', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            const message = `Withdrawal request created successfully!${result.fee ? ` Fee: ₹${result.fee}` : ''}${result.net_amount ? ` Net Amount: ₹${result.net_amount}` : ''}`;
+            showSuccess(message);
+            bootstrap.Modal.getInstance(document.getElementById('withdrawModal')).hide();
+            form.reset();
+            loadWalletBalances();
+            loadTransactions();
+            loadRecentTransactions();
+        } else {
+            throw new Error(result.detail || result.error || 'Withdrawal request failed');
+        }
+    } catch (error) {
+        console.error('Error submitting withdrawal:', error);
+        showError('Withdrawal request failed: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// Wallet address generation removed - addresses are auto-created during registration
+
+// Display Update Functions
+function updateTransactionsDisplay(transactions) {
+    const container = document.getElementById('transactions-list');
+    
+    if (transactions.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <i class="material-icons-outlined fs-1">receipt_long</i>
+                <p>No transactions found</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Currency</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Balance After</th>
+                        <th>Reference</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    transactions.forEach(tx => {
+        const statusColor = getStatusColor(tx.status);
+        const typeIcon = getTransactionIcon(tx.transaction_type);
+        const amountClass = ['WITHDRAWAL', 'INVESTMENT'].includes(tx.transaction_type) ? 'text-danger' : 'text-success';
+        const amountPrefix = ['WITHDRAWAL', 'INVESTMENT'].includes(tx.transaction_type) ? '-' : '+';
+        
+        html += `
+            <tr>
+                <td>
+                    <i class="material-icons-outlined me-2">${typeIcon}</i>
+                    ${tx.transaction_type || 'Unknown'}
+                </td>
+                <td class="${amountClass}">
+                    ${amountPrefix}${tx.currency === 'USDT' ? '' : '₹'}${parseFloat(tx.amount || 0).toFixed(tx.currency === 'USDT' ? 6 : 2)}
+                </td>
+                <td>
+                    <span class="badge bg-secondary">${tx.currency || 'INR'}</span>
+                </td>
+                <td>
+                    <span class="badge bg-${statusColor}">${tx.status || 'Unknown'}</span>
+                </td>
+                <td>${new Date(tx.created_at).toLocaleDateString()}</td>
+                <td>${tx.currency === 'USDT' ? '' : '₹'}${parseFloat(tx.balance_after || 0).toFixed(tx.currency === 'USDT' ? 6 : 2)}</td>
+                <td>
+                    <small class="text-muted">${tx.reference || tx.id || '-'}</small>
+                </td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+}
+
+function updateRecentTransactions(transactions, containerId, currency) {
+    const container = document.getElementById(containerId);
+    
+    if (transactions.length === 0) {
+        container.innerHTML = `
+            <h6 class="mb-3">Recent ${currency} Transactions</h6>
+            <div class="text-center text-muted py-3">
+                <i class="material-icons-outlined fs-4">receipt_long</i>
+                <p class="mb-0">No transactions yet</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `<h6 class="mb-3">Recent ${currency} Transactions</h6>`;
+    
+    transactions.slice(0, 3).forEach(tx => {
+        const statusColor = getStatusColor(tx.status);
+        const typeIcon = getTransactionIcon(tx.transaction_type);
+        const amountClass = ['WITHDRAWAL', 'INVESTMENT'].includes(tx.transaction_type) ? 'text-danger' : 'text-success';
+        const amountPrefix = ['WITHDRAWAL', 'INVESTMENT'].includes(tx.transaction_type) ? '-' : '+';
+        
+        html += `
+            <div class="d-flex justify-content-between align-items-center mb-2 p-2 border rounded">
+                <div class="d-flex align-items-center">
+                    <i class="material-icons-outlined me-2 text-muted">${typeIcon}</i>
+                    <div>
+                        <small class="fw-bold">${tx.transaction_type}</small><br>
+                        <small class="text-muted">${new Date(tx.created_at).toLocaleDateString()}</small>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <div class="${amountClass} fw-bold">
+                        ${amountPrefix}${currency === 'USDT' ? '' : '₹'}${parseFloat(tx.amount || 0).toFixed(currency === 'USDT' ? 6 : 2)}
+                    </div>
+                    <span class="badge bg-${statusColor} badge-sm">${tx.status}</span>
+                </div>
+            </div>
+        `;
+    });
+    
+    if (transactions.length > 3) {
+        html += `
+            <div class="text-center mt-2">
+                <a href="#" onclick="document.getElementById('currency-filter').value='${currency}'; loadTransactions();" class="btn btn-sm btn-outline-primary">
+                    View All ${currency} Transactions
+                </a>
+            </div>
+        `;
+    }
+    
+    container.innerHTML = html;
+}
+
+// Modal Functions
+function openDepositModal() {
+    new bootstrap.Modal(document.getElementById('depositModal')).show();
+}
+
+function openWithdrawModal() {
+    new bootstrap.Modal(document.getElementById('withdrawModal')).show();
+}
+
+// Utility Functions
+function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+        showSuccess('Address copied to clipboard!');
+    }).catch(() => {
+        showError('Failed to copy to clipboard');
+    });
+}
+
+function refreshTransactions() {
+    currentPage = 1;
+    loadTransactions();
+    loadRecentTransactions();
+}
+
+function exportTransactions() {
+    // Implement transaction export functionality
+    showInfo('Export functionality will be available soon');
+}
+
+function updateStatusBadge(elementId, isActive) {
+    const element = document.getElementById(elementId);
+    if (isActive) {
+        element.className = 'badge bg-success mt-2';
+        element.textContent = 'Active';
+    } else {
+        element.className = 'badge bg-danger mt-2';
+        element.textContent = 'Inactive';
+    }
+}
+
+function getStatusColor(status) {
+    switch(status?.toLowerCase()) {
+        case 'completed':
+        case 'approved':
+        case 'success': return 'success';
+        case 'pending': return 'warning';
+        case 'failed':
+        case 'rejected': return 'danger';
+        default: return 'secondary';
+    }
+}
+
+function getTransactionIcon(type) {
+    switch(type?.toLowerCase()) {
+        case 'deposit': return 'add_circle';
+        case 'withdrawal': return 'remove_circle';
+        case 'investment': return 'trending_up';
+        case 'roi': return 'account_balance';
+        case 'referral': return 'share';
+        default: return 'swap_horiz';
+    }
+}
+
+function updatePagination(data, containerId) {
+    const container = document.getElementById(containerId);
+    if (!data.count || data.count <= 10) {
+        container.innerHTML = '';
+        return;
+    }
+    
+    const totalPages = Math.ceil(data.count / 10);
+    let paginationHtml = '<ul class="pagination pagination-sm">';
+    
+    if (data.previous) {
+        paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="loadTransactions(${currentPage - 1})">Previous</a></li>`;
+    }
+    
+    for (let i = Math.max(1, currentPage - 2); i <= Math.min(totalPages, currentPage + 2); i++) {
+        paginationHtml += `<li class="page-item ${i === currentPage ? 'active' : ''}">
+            <a class="page-link" href="#" onclick="loadTransactions(${i})">${i}</a>
+        </li>`;
+    }
+    
+    if (data.next) {
+        paginationHtml += `<li class="page-item"><a class="page-link" href="#" onclick="loadTransactions(${currentPage + 1})">Next</a></li>`;
+    }
+    
+    paginationHtml += '</ul>';
+    container.innerHTML = paginationHtml;
+    currentPage = currentPage; // Update current page
+}
+
+function showLoading(message = 'Loading...') {
+    const loadingHtml = `
+        <div id="loading-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" 
+             style="background-color: rgba(0,0,0,0.5); z-index: 9999;">
+            <div class="card text-center p-4">
+                <div class="card-body">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mb-0">${message}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', loadingHtml);
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+// Withdrawal form handling functions
+function handleCurrencyChange() {
+    const currency = document.getElementById('withdrawCurrency').value;
+    const payoutMethod = document.getElementById('withdrawPayoutMethod');
+    const amountInput = document.getElementById('withdrawAmount');
+    const minWithdrawText = document.getElementById('minWithdrawText');
+    
+    // Clear payout method selection
+    payoutMethod.value = '';
+    
+    // Update minimum withdrawal text and amount constraints
+    if (currency === 'USDT') {
+        minWithdrawText.textContent = 'Minimum withdrawal: 10 USDT';
+        amountInput.min = 10;
+        amountInput.step = 0.000001;
+    } else {
+        minWithdrawText.textContent = 'Minimum withdrawal: ₹100';
+        amountInput.min = 100;
+        amountInput.step = 0.01;
+    }
+    
+    // Hide both detail sections
+    document.getElementById('withdrawBankDetails').style.display = 'none';
+    document.getElementById('withdrawUSDTDetails').style.display = 'none';
+    
+    // Update payout method options based on currency
+    updatePayoutMethodOptions(currency);
+}
+
+function handlePayoutMethodChange() {
+    const payoutMethod = document.getElementById('withdrawPayoutMethod').value;
+    const bankDetails = document.getElementById('withdrawBankDetails');
+    const usdtDetails = document.getElementById('withdrawUSDTDetails');
+    
+    // Hide both sections first
+    bankDetails.style.display = 'none';
+    usdtDetails.style.display = 'none';
+    
+    if (payoutMethod === 'bank_transfer') {
+        bankDetails.style.display = 'block';
+        // Load user's bank details if available
+        loadUserBankDetails();
+    } else if (payoutMethod === 'usdt_wallet') {
+        usdtDetails.style.display = 'block';
+        // Load user's USDT details if available
+        loadUserUSDTDetails();
+    }
+}
+
+function updatePayoutMethodOptions(currency) {
+    const payoutMethod = document.getElementById('withdrawPayoutMethod');
+    const currentValue = payoutMethod.value;
+    
+    // Clear existing options
+    payoutMethod.innerHTML = '<option value="">Select Payout Method</option>';
+    
+    if (currency === 'INR') {
+        payoutMethod.innerHTML += '<option value="bank_transfer" data-currency="INR">Bank Transfer (INR)</option>';
+    } else if (currency === 'USDT') {
+        payoutMethod.innerHTML += '<option value="usdt_wallet" data-currency="USDT">USDT Wallet</option>';
+    }
+    
+    // Reset to first option
+    payoutMethod.value = '';
+}
+
+async function loadUserBankDetails() {
+    try {
+        const response = await apiRequest('/api/v1/profile/');
+        if (response.ok) {
+            const userData = await response.json();
+            
+            if (userData.bank_details) {
+                const details = userData.bank_details;
+                document.getElementById('withdrawAccountHolderName').value = details.account_holder_name || '';
+                document.getElementById('withdrawAccountNumber').value = details.account_number || '';
+                document.getElementById('withdrawIfscCode').value = details.ifsc_code || '';
+                document.getElementById('withdrawBankName').value = details.bank_name || '';
+            }
+        }
+    } catch (error) {
+        console.error('Error loading bank details:', error);
+    }
+}
+
+async function loadUserUSDTDetails() {
+    try {
+        const response = await apiRequest('/api/v1/profile/');
+        if (response.ok) {
+            const userData = await response.json();
+            
+            if (userData.usdt_details) {
+                const details = userData.usdt_details;
+                document.getElementById('withdrawNetwork').value = details.network_display_name || details.network || 'Not provided';
+                document.getElementById('withdrawWalletAddress').value = details.wallet_address || 'Not provided';
+                
+                // Check if USDT details are verified
+                if (!details.is_verified) {
+                    showError('Your USDT wallet details are not verified. Please contact admin for verification.');
+                }
+            } else {
+                showError('No USDT wallet details found. Please add your USDT wallet details in your profile first.');
+            }
+        }
+    } catch (error) {
+        console.error('Error loading USDT details:', error);
+        showError('Failed to load USDT wallet details');
+    }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,729 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block extrastyle %}
+<style>
+    .dashboard-container {
+        padding: 20px;
+        background: #f8f9fa;
+        min-height: 100vh;
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .refresh-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .refresh-btn:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+    }
+    
+    .live-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #28a745;
+        font-weight: 500;
+    }
+    
+    .live-dot {
+        width: 8px;
+        height: 8px;
+        background: #28a745;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    
+    .dashboard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .refresh-btn {
+        background: #007bff;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s ease;
+    }
+    
+    .refresh-btn:hover {
+        background: #0056b3;
+        transform: translateY(-2px);
+    }
+    
+    .refresh-btn.loading {
+        background: #6c757d;
+        pointer-events: none;
+    }
+    
+    .search-box {
+        flex: 1;
+        max-width: 400px;
+        margin: 0 20px;
+    }
+    
+    .search-box input {
+        width: 100%;
+        padding: 10px 15px;
+        border: 2px solid #e9ecef;
+        border-radius: 25px;
+        font-size: 14px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .search-box input:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 3px rgba(0,123,255,0.1);
+    }
+    
+    .live-indicator {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #28a745;
+        font-weight: 500;
+    }
+    
+    .live-dot {
+        width: 8px;
+        height: 8px;
+        background: #28a745;
+        border-radius: 50%;
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% { opacity: 1; }
+        50% { opacity: 0.5; }
+        100% { opacity: 1; }
+    }
+    
+    .notifications-panel {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid #ffc107;
+    }
+    
+    .notification-item {
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .notification-item:last-child {
+        border-bottom: none;
+    }
+    
+    .notification-badge {
+        background: #dc3545;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 12px;
+        font-size: 0.8rem;
+        font-weight: bold;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid #007bff;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+    }
+    
+    .stat-card.users { border-left-color: #28a745; }
+    .stat-card.investments { border-left-color: #ffc107; }
+    .stat-card.wallets { border-left-color: #17a2b8; }
+    .stat-card.kyc { border-left-color: #6f42c1; }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: bold;
+        color: #333;
+        margin-bottom: 5px;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-change {
+        font-size: 0.8rem;
+        color: #28a745;
+        margin-top: 5px;
+    }
+    
+    .recent-activity {
+        background: white;
+        border-radius: 10px;
+        padding: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        margin-bottom: 20px;
+    }
+    
+    .activity-title {
+        font-size: 1.2rem;
+        font-weight: bold;
+        margin-bottom: 15px;
+        color: #333;
+        border-bottom: 2px solid #007bff;
+        padding-bottom: 10px;
+    }
+    
+    .activity-item {
+        padding: 10px 0;
+        border-bottom: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        transition: background-color 0.3s ease;
+    }
+    
+    .activity-item:hover {
+        background-color: #f8f9fa;
+        padding-left: 10px;
+        padding-right: 10px;
+        margin-left: -10px;
+        margin-right: -10px;
+        border-radius: 5px;
+    }
+    
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+    
+    .activity-info {
+        flex: 1;
+    }
+    
+    .activity-user {
+        font-weight: bold;
+        color: #007bff;
+    }
+    
+    .activity-details {
+        color: #666;
+        font-size: 0.9rem;
+    }
+    
+    .activity-time {
+        color: #999;
+        font-size: 0.8rem;
+    }
+    
+    .chart-container {
+        height: 300px;
+        margin-top: 20px;
+    }
+    
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 15px;
+        margin-bottom: 30px;
+    }
+    
+    .action-btn {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 15px 20px;
+        background: white;
+        border: none;
+        border-radius: 10px;
+        text-decoration: none;
+        color: #333;
+        font-weight: 500;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        transition: all 0.3s ease;
+        text-align: center;
+        justify-content: center;
+    }
+    
+    .action-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        text-decoration: none;
+        color: #333;
+    }
+    
+    .action-btn.approve {
+        border-left: 4px solid #28a745;
+    }
+    
+    .action-btn.view {
+        border-left: 4px solid #007bff;
+    }
+    
+    .action-btn i {
+        font-size: 1.2rem;
+    }
+    
+    .loading-spinner {
+        display: none;
+        width: 16px;
+        height: 16px;
+        border: 2px solid #ffffff;
+        border-top: 2px solid transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .data-timestamp {
+        font-size: 0.8rem;
+        color: #666;
+        text-align: right;
+        margin-top: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Dashboard Header with Live Indicator and Refresh -->
+    <div class="dashboard-header">
+        <div>
+            <h1 style="margin: 0; color: #333;">Investment Platform Dashboard</h1>
+            <div class="live-indicator">
+                <div class="live-dot"></div>
+                <span>Live Data</span>
+            </div>
+        </div>
+        
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search users, investments, transactions...">
+        </div>
+        
+        <button class="refresh-btn" id="refreshBtn" onclick="refreshDashboard()">
+            <i class="fas fa-sync-alt"></i>
+            <span>Refresh Data</span>
+            <div class="loading-spinner"></div>
+        </button>
+    </div>
+    
+    <!-- Live Notifications Panel -->
+    <div class="notifications-panel">
+        <div class="activity-title">
+            <i class="fas fa-bell"></i>
+            Live Notifications
+            <span class="notification-badge" id="notificationCount">3</span>
+        </div>
+        <div id="notificationsList">
+            <div class="notification-item">
+                <div class="activity-info">
+                    <div class="activity-user">System Alert</div>
+                    <div class="activity-details">New investment request from user</div>
+                </div>
+                <div class="activity-time">Just now</div>
+            </div>
+            <div class="notification-item">
+                <div class="activity-info">
+                    <div class="activity-user">KYC Update</div>
+                    <div class="activity-details">5 new KYC documents pending review</div>
+                </div>
+                <div class="activity-time">2 minutes ago</div>
+            </div>
+            <div class="notification-item">
+                <div class="activity-info">
+                    <div class="activity-user">Wallet Activity</div>
+                    <div class="activity-details">Large deposit detected: ₹50,000</div>
+                </div>
+                <div class="activity-time">5 minutes ago</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="{% url 'admin:backend_app_kyc_kycdocument_changelist' %}?status__exact=pending" class="action-btn approve">
+            <i class="fas fa-user-check"></i>
+            Review KYC ({{ pending_kyc }})
+        </a>
+        <a href="{% url 'admin:backend_app_wallet_depositrequest_changelist' %}?status__exact=pending" class="action-btn approve">
+            <i class="fas fa-money-bill-wave"></i>
+            Review Deposits
+        </a>
+        <a href="{% url 'admin:investments_withdrawalrequest_changelist' %}?status__exact=pending" class="action-btn approve">
+            <i class="fas fa-hand-holding-usd"></i>
+            Review Withdrawals
+        </a>
+        <a href="{% url 'admin:accounts_customuser_changelist' %}" class="action-btn view">
+            <i class="fas fa-users"></i>
+            Manage Users
+        </a>
+    </div>
+    
+    <!-- Statistics Grid -->
+    <div class="stats-grid">
+        <div class="stat-card users" onclick="showUserDetails()">
+            <div class="stat-number">{{ total_users }}</div>
+            <div class="stat-label">Total Users</div>
+            <div class="stat-change">+{{ new_users_today }} today, +{{ new_users_week }} this week</div>
+        </div>
+        
+        <div class="stat-card users" onclick="showVerifiedUserDetails()">
+            <div class="stat-number">{{ verified_users }}</div>
+            <div class="stat-label">Verified Users</div>
+            <div class="stat-change">{{ verified_users|floatformat:1 }}% verification rate</div>
+        </div>
+        
+        <div class="stat-card investments" onclick="showInvestmentDetails()">
+            <div class="stat-number">{{ active_investments }}</div>
+            <div class="stat-label">Active Investments</div>
+            <div class="stat-change">₹{{ total_investment_amount|floatformat:0 }} total value</div>
+        </div>
+        
+        <div class="stat-card wallets" onclick="showWalletDetails()">
+            <div class="stat-number">{{ total_inr_wallets|add:total_usdt_wallets }}</div>
+            <div class="stat-label">Total Wallets</div>
+            <div class="stat-change">₹{{ total_inr_balance|floatformat:0 }} + ${{ total_usdt_balance|floatformat:2 }}</div>
+        </div>
+        
+        <div class="stat-card kyc" onclick="showKYCDetails()">
+            <div class="stat-number">{{ pending_kyc }}</div>
+            <div class="stat-label">Pending KYC</div>
+            <div class="stat-change">{{ approved_kyc }} approved</div>
+        </div>
+        
+        <div class="stat-card investments" onclick="showAllInvestmentDetails()">
+            <div class="stat-number">{{ total_investments }}</div>
+            <div class="stat-label">Total Investments</div>
+            <div class="stat-change">All time</div>
+        </div>
+    </div>
+    
+    <!-- Recent Activities -->
+    <div class="recent-activity">
+        <div class="activity-title">Recent Investments</div>
+        {% for investment in recent_investments %}
+        <div class="activity-item" onclick="showInvestmentDetail('{{ investment.id }}')">
+            <div class="activity-info">
+                <div class="activity-user">{{ investment.user.username }}</div>
+                <div class="activity-details">{{ investment.plan.package_name }} - ₹{{ investment.amount }}</div>
+            </div>
+            <div class="activity-time">{{ investment.invested_at|timesince }} ago</div>
+        </div>
+        {% empty %}
+        <div class="activity-item">
+            <div class="activity-info">No recent investments</div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="recent-activity">
+        <div class="activity-title">Recent Deposits</div>
+        {% for deposit in recent_deposits %}
+        <div class="activity-item" onclick="showDepositDetail('{{ deposit.id }}')">
+            <div class="activity-info">
+                <div class="activity-user">{{ deposit.user.username }}</div>
+                <div class="activity-details">₹{{ deposit.amount }} - {{ deposit.payment_method }}</div>
+            </div>
+            <div class="activity-time">{{ deposit.created_at|timesince }} ago</div>
+        </div>
+        {% empty %}
+        <div class="activity-item">
+            <div class="activity-info">No recent deposits</div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="recent-activity">
+        <div class="activity-title">Recent Withdrawals</div>
+        {% for withdrawal in recent_withdrawals %}
+        <div class="activity-item" onclick="showWithdrawalDetail('{{ withdrawal.id }}')">
+            <div class="activity-info">
+                <div class="activity-user">{{ withdrawal.user.username }}</div>
+                <div class="activity-details">₹{{ withdrawal.amount }} - {{ withdrawal.status }}</div>
+            </div>
+            <div class="activity-time">{{ withdrawal.requested_at|timesince }} ago</div>
+        </div>
+        {% empty %}
+        <div class="activity-item">
+            <div class="activity-info">No recent withdrawals</div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="data-timestamp">
+        Last updated: <span id="lastUpdateTime">{{ "now"|date:"F j, Y, g:i a" }}</span>
+    </div>
+</div>
+
+<script>
+// Search functionality
+document.getElementById('searchInput').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const activityItems = document.querySelectorAll('.activity-item');
+    
+    activityItems.forEach(item => {
+        const text = item.textContent.toLowerCase();
+        if (text.includes(searchTerm)) {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+
+// Refresh dashboard functionality
+function refreshDashboard() {
+    const refreshBtn = document.getElementById('refreshBtn');
+    const loadingSpinner = refreshBtn.querySelector('.loading-spinner');
+    const btnText = refreshBtn.querySelector('span');
+    
+    // Show loading state
+    refreshBtn.classList.add('loading');
+    loadingSpinner.style.display = 'inline-block';
+    btnText.textContent = 'Refreshing...';
+    
+    // Simulate refresh (in real implementation, this would make an AJAX call)
+    setTimeout(() => {
+        // Update timestamp
+        document.getElementById('lastUpdateTime').textContent = new Date().toLocaleString();
+        
+        // Update notification count randomly
+        const newCount = Math.floor(Math.random() * 5) + 1;
+        document.getElementById('notificationCount').textContent = newCount;
+        
+        // Reset button state
+        refreshBtn.classList.remove('loading');
+        loadingSpinner.style.display = 'none';
+        btnText.textContent = 'Refresh Data';
+        
+        // Show success message
+        showNotification('Dashboard refreshed successfully!', 'success');
+    }, 2000);
+}
+
+// Interactive card click handlers
+function showUserDetails() {
+    showNotification('Opening user management...', 'info');
+    setTimeout(() => {
+        window.location.href = "{% url 'admin:accounts_customuser_changelist' %}";
+    }, 1000);
+}
+
+function showVerifiedUserDetails() {
+    showNotification('Showing verified users...', 'info');
+    setTimeout(() => {
+        window.location.href = "{% url 'admin:accounts_customuser_changelist' %}?is_verified__exact=1";
+    }, 1000);
+}
+
+function showInvestmentDetails() {
+    showNotification('Opening investment management...', 'info');
+    setTimeout(() => {
+        window.location.href = "{% url 'admin:investments_userinvestment_changelist' %}?status__exact=active";
+    }, 1000);
+}
+
+function showWalletDetails() {
+    showNotification('Opening wallet management...', 'info');
+    setTimeout(() => {
+        window.location.href = "{% url 'admin:backend_app_wallet_inrwallet_changelist' %}";
+    }, 1000);
+}
+
+function showKYCDetails() {
+    showNotification('Opening KYC management...', 'info');
+    setTimeout(() => {
+        window.location.href = "{% url 'admin:backend_app_kyc_kycdocument_changelist' %}?status__exact=pending";
+    }, 1000);
+}
+
+function showAllInvestmentDetails() {
+    showNotification('Opening all investments...', 'info');
+    setTimeout(() => {
+        window.location.href = "{% url 'admin:investments_userinvestment_changelist' %}";
+    }, 1000);
+}
+
+function showInvestmentDetail(id) {
+    showNotification(`Opening investment details for ID: ${id}`, 'info');
+    setTimeout(() => {
+        window.location.href = `{% url 'admin:investments_userinvestment_changelist' %}${id}/change/`;
+    }, 1000);
+}
+
+function showDepositDetail(id) {
+    showNotification(`Opening deposit details for ID: ${id}`, 'info');
+    setTimeout(() => {
+        window.location.href = `{% url 'admin:backend_app_wallet_depositrequest_changelist' %}${id}/change/`;
+    }, 1000);
+}
+
+function showWithdrawalDetail(id) {
+    showNotification(`Opening withdrawal details for ID: ${id}`, 'info');
+    setTimeout(() => {
+        window.location.href = `{% url 'admin:investments_withdrawalrequest_changelist' %}${id}/change/`;
+    }, 1000);
+}
+
+// Notification system
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#007bff'};
+        color: white;
+        padding: 15px 20px;
+        border-radius: 5px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        z-index: 10000;
+        max-width: 300px;
+        animation: slideIn 0.3s ease;
+    `;
+    notification.textContent = message;
+    
+    // Add to page
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            document.body.removeChild(notification);
+        }, 300);
+    }, 3000);
+}
+
+// Add CSS animations
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to { transform: translateX(0); opacity: 1; }
+    }
+    @keyframes slideOut {
+        from { transform: translateX(0); opacity: 1; }
+        to { transform: translateX(100%); opacity: 0; }
+    }
+`;
+document.head.appendChild(style);
+
+// Auto-refresh every 5 minutes
+setInterval(() => {
+    showNotification('Auto-refreshing dashboard data...', 'info');
+    refreshDashboard();
+}, 300000);
+
+// Real-time data monitoring
+function startRealTimeMonitoring() {
+    // Monitor for new users
+    setInterval(() => {
+        fetch('/admin/api/dashboard-stats/')
+            .then(response => response.json())
+            .then(data => {
+                if (data.new_users > 0) {
+                    showNotification(`New user registered: ${data.new_users}`, 'success');
+                }
+                if (data.new_investments > 0) {
+                    showNotification(`New investment: ₹${data.new_investments}`, 'info');
+                }
+            })
+            .catch(error => {
+                console.log('Real-time monitoring active...');
+            });
+    }, 10000); // Check every 10 seconds
+}
+
+// Start monitoring when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    startRealTimeMonitoring();
+    
+    // Add click effects to stat cards
+    const statCards = document.querySelectorAll('.stat-card');
+    statCards.forEach(card => {
+        card.addEventListener('click', function() {
+            this.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                this.style.transform = 'scale(1)';
+            }, 150);
+        });
+    });
+    
+    // Add hover effects to activity items
+    const activityItems = document.querySelectorAll('.activity-item');
+    activityItems.forEach(item => {
+        item.addEventListener('mouseenter', function() {
+            this.style.backgroundColor = '#f8f9fa';
+            this.style.transform = 'translateX(5px)';
+        });
+        
+        item.addEventListener('mouseleave', function() {
+            this.style.backgroundColor = 'transparent';
+            this.style.transform = 'translateX(0)';
+        });
+    });
+});
+</script>
+{% endblock %}

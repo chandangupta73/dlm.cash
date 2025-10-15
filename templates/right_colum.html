@@ -1,0 +1,96 @@
+<div class="col-lg-4">
+    <aside class="blog-sidebar">
+        <div class="blog-widget">
+            <h2 class="bw-title">Categories</h2>
+            <div class="category-list">
+                <ul class="category-menu">
+                    {% for cat in categories %}
+                    <li class="category-item">
+                        <span class="category-name toggle-subcats">{{ cat.category }}<i
+                                class="fas fa-chevron-right"></i></span>
+                        <ul class="subcategory-list">
+                            {% for subcat in cat.subcategory_set.all %}
+                            <li>
+                                <a href="{% url 'blog_list_by_subcategory' cat.slug subcat.slug %}">
+                                    {{ subcat.sub_category }} <span>{{ subcat.blog_set.count }}</span>
+                                </a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="blog-widget">
+            <h2 class="bw-title">Recent Post</h2>
+            <div class="rc-post-wrap">
+                {% for blog in recent_blogs %}
+                <div class="rc-post-item">
+                    <div class="rc-post-thumb">
+                        <a
+                            href="{% url 'blogdetails' category_slug=blog.blog_category.category.slug subcategory_slug=blog.blog_category.slug blog_slug=blog.slug %}"><img
+                                src="{{ blog.blog_image.url }}" alt=""></a>
+                    </div>
+                    <div class="rc-post-content">
+                        <span>{{ blog.blog_date }}</span>
+                        <h4 class="title"><a
+                                href="{% url 'blogdetails' category_slug=blog.blog_category.category.slug subcategory_slug=blog.blog_category.slug blog_slug=blog.slug %}">{{ blog.blog_title }}</a></h4>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </aside>
+</div>
+
+<style>
+    .category-menu {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .category-item {
+        padding: 5px 10px;
+    }
+
+    .category-name {
+        cursor: pointer;
+        font-weight: bold;
+        display: block;
+        transition: color 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+
+    .category-name:hover {
+        color: #007bff;
+    }
+
+    .subcategory-list {
+        display: none;
+        list-style: none;
+        margin-left: 15px;
+        padding-left: 10px;
+        border-left: 2px solid #ddd;
+    }
+
+    .category-item.active .subcategory-list {
+        display: block;
+    }
+</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const toggles = document.querySelectorAll('.toggle-subcats');
+
+        toggles.forEach(function (toggle) {
+            toggle.addEventListener('click', function () {
+                const parent = this.parentElement;
+                parent.classList.toggle('active');
+            });
+        });
+    });
+</script>

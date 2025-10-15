@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge" />
+    <title>Profile - Investment Platform</title>
+    <meta name="description" content="" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    {% load static %}
+    
+    <!-- CSS -->
+    <link href="{% static 'dashboard/assets/css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'dashboard/sass/main.css' %}" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+</head>
+<body>
+    <!-- Load auth.js for JWT management -->
+    <script src="{% static 'assets/js/auth.js' %}"></script>
+
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>User Profile</h4>
+                        <a href="/auth/dashboard/" class="btn btn-primary">Back to Dashboard</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h5>Personal Information</h5>
+                                <p><strong>First Name:</strong> <span id="firstName">Loading...</span></p>
+                                <p><strong>Last Name:</strong> <span id="lastName">Loading...</span></p>
+                                <p><strong>Email:</strong> <span id="userEmail">Loading...</span></p>
+                                <p><strong>Phone:</strong> <span id="userPhone">Loading...</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <h5>Referral Information</h5>
+                                <p><strong>Referral Code:</strong> <span id="referralCode">Loading...</span></p>
+                                <p><strong>Total Referrals:</strong> <span class="total-referrals">0</span></p>
+                                <p><strong>Total Earnings:</strong> <span class="total-earnings">₹0.00</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="{% static 'dashboard/assets/js/jquery.min.js' %}"></script>
+    <script src="{% static 'dashboard/assets/css/bootstrap.min.css' %}"></script>
+    
+    <script>
+        // Load user profile data from backend
+        async function loadUserProfile() {
+            try {
+                const response = await apiRequest('/api/v1/profile/');
+                const data = await response.json();
+                
+                // Update profile fields
+                if (data.first_name) document.getElementById('firstName').textContent = data.first_name;
+                if (data.last_name) document.getElementById('lastName').textContent = data.last_name;
+                if (data.email) document.getElementById('userEmail').textContent = data.email;
+                if (data.phone_number) document.getElementById('userPhone').textContent = data.phone_number;
+                if (data.referral_code) document.getElementById('referralCode').textContent = data.referral_code;
+                
+                console.log('User profile loaded:', data);
+            } catch (error) {
+                console.error('Error loading user profile:', error);
+                
+                // Fallback: try getting user data from login response
+                const userString = localStorage.getItem('user_data');
+                if (userString) {
+                    try {
+                        const userData = JSON.parse(userString);
+                        if (userData.first_name) document.getElementById('firstName').textContent = userData.first_name;
+                        if (userData.last_name) document.getElementById('lastName').textContent = userData.last_name;
+                        if (userData.email) document.getElementById('userEmail').textContent = userData.email;
+                        if (userData.phone_number) document.getElementById('userPhone').textContent = userData.phone_number;
+                    } catch (e) {
+                        console.error('Error parsing stored user data:', e);
+                    }
+                }
+            }
+        }
+
+        // Load referral statistics
+        async function loadReferralStats() {
+            try {
+                const response = await apiRequest('http://localhost:8000/api/v1/referrals/profile/');
+                const data = await response.json();
+                
+                // Update referral stats
+                if (data.referral_code) document.getElementById('referralCode').textContent = data.referral_code;
+                if (data.total_referrals !== undefined) {
+                    const totalReferralsElement = document.querySelector('.total-referrals');
+                    if (totalReferralsElement) totalReferralsElement.textContent = data.total_referrals;
+                }
+                if (data.total_earnings) {
+                    const totalEarningsElement = document.querySelector('.total-earnings');
+                    if (totalEarningsElement) totalEarningsElement.textContent = `₹${data.total_earnings}`;
+                }
+                
+                console.log('Referral stats loaded:', data);
+            } catch (error) {
+                console.error('Error loading referral stats:', error);
+            }
+        }
+
+        // Load profile data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (AuthManager.isAuthenticated()) {
+                loadUserProfile();
+                loadReferralStats();
+            } else {
+                // Redirect to login if not authenticated
+                window.location.href = '/auth/login/';
+            }
+        });
+    </script>
+</body>
+</html>

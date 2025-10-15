@@ -1,0 +1,704 @@
+{% extends 'user_menu.html' %}
+{% load static %}
+{% block main %}
+<!-- Load auth.js for JWT management -->
+<script src="{% static 'assets/js/auth.js' %}"></script>
+
+<!--start main wrapper-->
+<main class="main-wrapper">
+    <div class="main-content">
+        <!--breadcrumb-->
+        <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+            <div class="breadcrumb-title pe-3">Buy Plan</div>
+            <div class="ps-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 p-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="bx bx-home-alt"></i></a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'plans' %}">Investment Plans</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">Buy Plan</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <!--end breadcrumb-->
+
+        <!-- Plan Details and Payment Methods -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <h5 class="mb-0">
+                            <i class="material-icons-outlined text-primary me-2">shopping_cart</i>
+                            Select a payment method for: <span class="text-primary" id="plan-name">Loading...</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Plan Summary -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Plan Details</h6>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <small class="text-muted">Amount</small>
+                                                <p class="mb-0 fw-bold" id="plan-amount">Loading...</p>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">ROI Rate</small>
+                                                <p class="mb-0 fw-bold" id="plan-roi">Loading...</p>
+                                            </div>
+                                        </div>
+                                        <div class="row mt-2">
+                                            <div class="col-6">
+                                                <small class="text-muted">Duration</small>
+                                                <p class="mb-0 fw-bold" id="plan-duration">Loading...</p>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">Frequency</small>
+                                                <p class="mb-0 fw-bold" id="plan-frequency">Loading...</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="card bg-light">
+                                    <div class="card-body">
+                                        <h6 class="card-title">Your Wallet Balance</h6>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <small class="text-muted">INR Balance</small>
+                                                <p class="mb-0 fw-bold text-success" id="inr-balance">Loading...</p>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">USDT Balance</small>
+                                                <p class="mb-0 fw-bold text-primary" id="usdt-balance">Loading...</p>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-muted">Required Amount</small>
+                                            <p class="mb-0 fw-bold text-danger" id="required-amount">Loading...</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Methods -->
+                        <div class="row">
+                            <div class="col-12">
+                                <h6 class="mb-3">Choose Payment Method:</h6>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <!-- Request Admin to Buy -->
+                            <div class="col-md-4">
+                                <div class="card border h-100 payment-method-card" onclick="selectPaymentMethod('admin_request')">
+                                    <div class="card-body text-center">
+                                        <div class="avatar avatar-lg bg-primary bg-opacity-10 rounded-circle mx-auto mb-3">
+                                            <i class="material-icons-outlined text-primary fs-1">admin_panel_settings</i>
+                                        </div>
+                                        <h6 class="card-title">Request Admin to Buy</h6>
+                                        <p class="card-text small text-muted">
+                                            Submit a request for admin approval. No immediate payment required.
+                                        </p>
+                                        <div class="mt-3">
+                                            <span class="badge bg-primary">Recommended</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pay with USDT -->
+                            <div class="col-md-4">
+                                <div class="card border h-100 payment-method-card" onclick="selectPaymentMethod('usdt')">
+                                    <div class="card-body text-center">
+                                        <div class="avatar avatar-lg bg-success bg-opacity-10 rounded-circle mx-auto mb-3">
+                                            <i class="material-icons-outlined text-success fs-1">currency_bitcoin</i>
+                                        </div>
+                                        <h6 class="card-title">Pay with USDT</h6>
+                                        <p class="card-text small text-muted">
+                                            Direct investment using your USDT wallet balance.
+                                        </p>
+                                        <div class="mt-3">
+                                            <span class="badge bg-success" id="usdt-status">Available</span>
+                                            <div class="mt-2">
+                                                <small class="text-muted">Equivalent: <span id="usdt-equivalent">0.000000 USDT</span></small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Pay with INR -->
+                            <div class="col-md-4">
+                                <div class="card border h-100 payment-method-card" onclick="selectPaymentMethod('inr')">
+                                    <div class="card-body text-center">
+                                        <div class="avatar avatar-lg bg-warning bg-opacity-10 rounded-circle mx-auto mb-3">
+                                            <i class="material-icons-outlined text-warning fs-1">account_balance</i>
+                                        </div>
+                                        <h6 class="card-title">Pay with INR</h6>
+                                        <p class="card-text small text-muted">
+                                            Direct investment using your INR wallet balance.
+                                        </p>
+                                        <div class="mt-3">
+                                            <span class="badge bg-warning" id="inr-status">Available</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Payment Method Details -->
+                        <div class="row mt-4" id="payment-details" style="display: none;">
+                            <div class="col-12">
+                                <div class="card border-primary">
+                                    <div class="card-header bg-primary text-white">
+                                        <h6 class="mb-0" id="payment-method-title">Payment Method Details</h6>
+                                    </div>
+                                    <div class="card-body" id="payment-method-content">
+                                        <!-- Content will be loaded here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<!--end main wrapper-->
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmationModalLabel">
+                    <i class="material-icons-outlined text-warning me-2">warning</i>
+                    Confirm Investment
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="confirmation-content">
+                    <!-- Content will be loaded here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirm-btn" onclick="confirmInvestment()">
+                    <i class="material-icons-outlined me-1">check_circle</i>Confirm Investment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Buy Plan Page -->
+<script>
+let selectedPlan = null;
+let selectedPaymentMethod = null;
+let userWalletBalances = {};
+
+// Check if user is authenticated
+function isAuthenticated() {
+    // Use the AuthManager class from auth.js
+    if (typeof AuthManager !== 'undefined' && AuthManager.isAuthenticated) {
+        return AuthManager.isAuthenticated();
+    }
+    // Fallback to direct localStorage check
+    const token = localStorage.getItem('access_token');
+    return token && token !== 'null' && token !== 'undefined';
+}
+
+// Initialize page on load
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Buy plan page loaded');
+    console.log('Current URL:', window.location.href);
+    console.log('Current pathname:', window.location.pathname);
+    
+    // Debug authentication
+    console.log('AuthManager available:', typeof AuthManager !== 'undefined');
+    console.log('Local storage access_token:', localStorage.getItem('access_token'));
+    console.log('Local storage refresh_token:', localStorage.getItem('refresh_token'));
+    
+    // Check if user is authenticated
+    if (!isAuthenticated()) {
+        console.log('User not authenticated, redirecting to login');
+        window.location.href = '/auth/login/';
+        return;
+    }
+    
+    console.log('User authenticated, proceeding with page load');
+    loadPlanDetails();
+    loadWalletBalances();
+    setupEventListeners();
+});
+
+function setupEventListeners() {
+    // Add hover effects to payment method cards
+    document.querySelectorAll('.payment-method-card').forEach(card => {
+        card.addEventListener('mouseenter', function() {
+            this.style.transform = 'translateY(-5px)';
+            this.style.boxShadow = '0 10px 25px rgba(0,0,0,0.15)';
+        });
+        
+        card.addEventListener('mouseleave', function() {
+            this.style.transform = 'translateY(0)';
+            this.style.boxShadow = '0 2px 10px rgba(0,0,0,0.1)';
+        });
+    });
+}
+
+async function loadPlanDetails() {
+    try {
+        // Get plan ID from URL path (e.g., /investment/buy/{plan_id}/)
+        const pathParts = window.location.pathname.split('/');
+        const planId = pathParts[pathParts.length - 2]; // Get the second-to-last part
+        
+        if (!planId || planId === 'buy') {
+            showError('Plan ID not found in URL');
+            return;
+        }
+
+        console.log('Loading plan details for ID:', planId);
+
+        const response = await apiRequest(`/api/v1/investment/investment-plans/${planId}/`);
+        const data = await response.json();
+        
+        if (response.ok) {
+            selectedPlan = data;
+            updatePlanDisplay();
+        } else {
+            if (response.status === 404) {
+                showError('Investment plan not found. Please check the plan ID.');
+                // Show a message to the user
+                document.getElementById('plan-name').textContent = 'Plan Not Found';
+                document.getElementById('plan-amount').textContent = 'N/A';
+                document.getElementById('plan-roi').textContent = 'N/A';
+                document.getElementById('plan-duration').textContent = 'N/A';
+                document.getElementById('plan-frequency').textContent = 'N/A';
+                document.getElementById('required-amount').textContent = 'N/A';
+                return;
+            } else if (response.status === 401) {
+                showError('Authentication required. Please log in again.');
+                setTimeout(() => {
+                    window.location.href = '/auth/login/';
+                }, 2000);
+                return;
+            } else {
+                throw new Error(data.detail || 'Failed to load plan details');
+            }
+        }
+    } catch (error) {
+        console.error('Error loading plan details:', error);
+        showError('Failed to load plan details: ' + error.message);
+    }
+}
+
+async function loadWalletBalances() {
+    try {
+        console.log('Loading wallet balances...');
+        const response = await apiRequest('/api/v1/wallet/balance/');
+        const data = await response.json();
+        
+        console.log('Wallet balance response:', data);
+        
+        if (response.ok) {
+            userWalletBalances = {
+                inr: parseFloat(data.inr_wallet?.balance || 0),
+                usdt: parseFloat(data.usdt_wallet?.balance || 0)
+            };
+            console.log('Parsed wallet balances:', userWalletBalances);
+            updateWalletDisplay();
+            updatePaymentMethodStatus();
+        } else {
+            if (response.status === 401) {
+                showError('Authentication required. Please log in again.');
+                setTimeout(() => {
+                    window.location.href = '/auth/login/';
+                }, 2000);
+                return;
+            } else {
+                showError('Failed to load wallet balances: ' + (data.detail || 'Unknown error'));
+                // Set default values
+                userWalletBalances = { inr: 0, usdt: 0 };
+                updateWalletDisplay();
+                updatePaymentMethodStatus();
+                return;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading wallet balances:', error);
+        showError('Failed to load wallet balances: ' + error.message);
+        // Set default values
+        userWalletBalances = { inr: 0, usdt: 0 };
+        updateWalletDisplay();
+        updatePaymentMethodStatus();
+    }
+}
+
+function updatePlanDisplay() {
+    if (!selectedPlan) return;
+    
+    document.getElementById('plan-name').textContent = selectedPlan.name;
+    document.getElementById('plan-amount').textContent = `₹${parseFloat(selectedPlan.fixed_amount).toFixed(2)}`;
+    document.getElementById('plan-roi').textContent = `${selectedPlan.roi_rate}% ${selectedPlan.frequency}`;
+    document.getElementById('plan-duration').textContent = `${selectedPlan.duration_days} days`;
+    document.getElementById('plan-frequency').textContent = selectedPlan.frequency;
+    document.getElementById('required-amount').textContent = `₹${parseFloat(selectedPlan.fixed_amount).toFixed(2)}`;
+}
+
+function updateWalletDisplay() {
+    document.getElementById('inr-balance').textContent = `₹${userWalletBalances.inr.toFixed(2)}`;
+    document.getElementById('usdt-balance').textContent = `${userWalletBalances.usdt.toFixed(6)} USDT`;
+}
+
+function updatePaymentMethodStatus() {
+    if (!selectedPlan) return;
+    
+    const requiredAmount = parseFloat(selectedPlan.fixed_amount);
+    
+    // Check INR payment availability
+    if (userWalletBalances.inr >= requiredAmount) {
+        document.getElementById('inr-status').textContent = 'Available';
+        document.getElementById('inr-status').className = 'badge bg-success';
+    } else {
+        document.getElementById('inr-status').textContent = 'Insufficient';
+        document.getElementById('inr-status').className = 'badge bg-danger';
+    }
+    
+    // Check USDT payment availability (assuming 1 USDT = ₹83 for now)
+    const usdtEquivalent = requiredAmount / 83; // You can make this dynamic
+    if (userWalletBalances.usdt >= usdtEquivalent) {
+        document.getElementById('usdt-status').textContent = 'Available';
+        document.getElementById('usdt-status').className = 'badge bg-success';
+    } else {
+        document.getElementById('usdt-status').textContent = 'Insufficient';
+        document.getElementById('usdt-status').className = 'badge bg-danger';
+    }
+    
+    // Update USDT equivalent display
+    const usdtEquivalentElement = document.getElementById('usdt-equivalent');
+    if (usdtEquivalentElement) {
+        usdtEquivalentElement.textContent = `${usdtEquivalent.toFixed(6)} USDT`;
+    }
+}
+
+function selectPaymentMethod(method) {
+    selectedPaymentMethod = method;
+    
+    // Remove active class from all cards
+    document.querySelectorAll('.payment-method-card').forEach(card => {
+        card.classList.remove('border-primary');
+    });
+    
+    // Add active class to selected card
+    event.currentTarget.classList.add('border-primary');
+    
+    // Show payment details
+    showPaymentMethodDetails(method);
+}
+
+function showPaymentMethodDetails(method) {
+    const detailsContainer = document.getElementById('payment-details');
+    const titleElement = document.getElementById('payment-method-title');
+    const contentElement = document.getElementById('payment-method-content');
+    
+    detailsContainer.style.display = 'block';
+    
+    switch(method) {
+        case 'admin_request':
+            titleElement.innerHTML = '<i class="material-icons-outlined me-2">admin_panel_settings</i>Request Admin to Buy';
+            contentElement.innerHTML = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6>How it works:</h6>
+                        <ul class="mb-3">
+                            <li>Submit your investment request to admin</li>
+                            <li>Admin will review and approve your request</li>
+                            <li>You'll be notified once approved</li>
+                            <li>No immediate payment required</li>
+                        </ul>
+                        <div class="alert alert-info">
+                            <i class="material-icons-outlined me-2">info</i>
+                            <strong>Note:</strong> This method is recommended for new users or when you prefer admin oversight.
+                        </div>
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button class="btn btn-primary btn-lg" onclick="processAdminRequest()">
+                            <i class="material-icons-outlined me-2">send</i>Submit Request
+                        </button>
+                    </div>
+                </div>
+            `;
+            break;
+            
+        case 'usdt':
+            const usdtEquivalent = (parseFloat(selectedPlan.fixed_amount) / 83).toFixed(6);
+            const canPayUSDT = userWalletBalances.usdt >= parseFloat(usdtEquivalent);
+            
+            titleElement.innerHTML = '<i class="material-icons-outlined me-2">currency_bitcoin</i>Pay with USDT';
+            contentElement.innerHTML = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6>USDT Payment Details:</h6>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">Required Amount</small>
+                                <p class="mb-0 fw-bold">${usdtEquivalent} USDT</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Your Balance</small>
+                                <p class="mb-0 fw-bold">${userWalletBalances.usdt.toFixed(6)} USDT</p>
+                            </div>
+                        </div>
+                        <div class="alert alert-info">
+                            <i class="material-icons-outlined me-2">info</i>
+                            <strong>Exchange Rate:</strong> 1 USDT = ₹83
+                        </div>
+                        ${canPayUSDT ? 
+                            `<div class="alert alert-success">
+                                <i class="material-icons-outlined me-2">check_circle</i>
+                                <strong>Sufficient Balance:</strong> You can proceed with USDT payment.
+                            </div>` :
+                            `<div class="alert alert-danger">
+                                <i class="material-icons-outlined me-2">error</i>
+                                <strong>Insufficient Balance:</strong> Please add more USDT to your wallet.
+                            </div>`
+                        }
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button class="btn btn-success btn-lg" onclick="processUSDTPayment()" ${!canPayUSDT ? 'disabled' : ''}>
+                            <i class="material-icons-outlined me-2">payment</i>Pay with USDT
+                        </button>
+                    </div>
+                </div>
+            `;
+            break;
+            
+        case 'inr':
+            const canPayINR = userWalletBalances.inr >= parseFloat(selectedPlan.fixed_amount);
+            
+            titleElement.innerHTML = '<i class="material-icons-outlined me-2">account_balance</i>Pay with INR';
+            contentElement.innerHTML = `
+                <div class="row">
+                    <div class="col-md-8">
+                        <h6>INR Payment Details:</h6>
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">Required Amount</small>
+                                <p class="mb-0 fw-bold">₹${parseFloat(selectedPlan.fixed_amount).toFixed(2)}</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Your Balance</small>
+                                <p class="mb-0 fw-bold">₹${userWalletBalances.inr.toFixed(2)}</p>
+                            </div>
+                        </div>
+                        ${canPayINR ? 
+                            `<div class="alert alert-success">
+                                <i class="material-icons-outlined me-2">check_circle</i>
+                                <strong>Sufficient Balance:</strong> You can proceed with INR payment.
+                            </div>` :
+                            `<div class="alert alert-danger">
+                                <i class="material-icons-outlined me-2">error</i>
+                                <strong>Insufficient Balance:</strong> Please add more INR to your wallet.
+                            </div>`
+                        }
+                    </div>
+                    <div class="col-md-4 text-center">
+                        <button class="btn btn-warning btn-lg" onclick="processINRPayment()" ${!canPayINR ? 'disabled' : ''}>
+                            <i class="material-icons-outlined me-2">payment</i>Pay with INR
+                        </button>
+                    </div>
+                </div>
+            `;
+            break;
+    }
+}
+
+// Payment Processing Functions
+async function processAdminRequest() {
+    try {
+        showLoading('Submitting admin request...');
+        
+        const requestData = {
+            plan: selectedPlan.id,
+            amount: parseFloat(selectedPlan.fixed_amount),
+            currency: 'INR', // Use uppercase for backend compatibility
+            payment_method: 'admin_request'
+        };
+        
+        console.log('DEBUG FRONTEND: Sending admin request with data:', requestData);
+        
+        const response = await apiRequest('/api/v1/investment/investments/', {
+            method: 'POST',
+            body: JSON.stringify(requestData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showSuccess('Admin request submitted successfully! You will be notified once approved.');
+            // Redirect to investments page
+            setTimeout(() => {
+                window.location.href = '/auth/investments/';
+            }, 2000);
+        } else {
+            throw new Error(result.detail || result.error || 'Failed to submit admin request');
+        }
+    } catch (error) {
+        console.error('Error submitting admin request:', error);
+        showError('Failed to submit admin request: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+function processUSDTPayment() {
+    const usdtEquivalent = (parseFloat(selectedPlan.fixed_amount) / 83).toFixed(6);
+    
+    document.getElementById('confirmation-content').innerHTML = `
+        <div class="text-center mb-3">
+            <i class="material-icons-outlined text-success fs-1">currency_bitcoin</i>
+        </div>
+        <h6 class="text-center mb-3">Confirm USDT Payment</h6>
+        <div class="alert alert-info">
+            <strong>Investment Plan:</strong> ${selectedPlan.name}<br>
+            <strong>INR Amount:</strong> ₹${parseFloat(selectedPlan.fixed_amount).toFixed(2)}<br>
+            <strong>USDT Amount:</strong> ${usdtEquivalent} USDT<br>
+            <strong>Exchange Rate:</strong> 1 USDT = ₹83<br>
+            <strong>ROI Rate:</strong> ${selectedPlan.roi_rate}% ${selectedPlan.frequency}<br>
+            <strong>Duration:</strong> ${selectedPlan.duration_days} days
+        </div>
+        <div class="alert alert-warning">
+            <i class="material-icons-outlined me-2">warning</i>
+            <strong>Important:</strong> This action will immediately deduct ${usdtEquivalent} USDT from your wallet and create the investment. This cannot be undone.
+        </div>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('confirmationModal')).show();
+}
+
+function processINRPayment() {
+    document.getElementById('confirmation-content').innerHTML = `
+        <div class="text-center mb-3">
+            <i class="material-icons-outlined text-warning fs-1">account_balance</i>
+        </div>
+        <h6 class="text-center mb-3">Confirm INR Payment</h6>
+        <div class="alert alert-info">
+            <strong>Investment Plan:</strong> ${selectedPlan.name}<br>
+            <strong>Amount:</strong> ₹${parseFloat(selectedPlan.fixed_amount).toFixed(2)}<br>
+            <strong>ROI Rate:</strong> ${selectedPlan.roi_rate}% ${selectedPlan.frequency}<br>
+            <strong>Duration:</strong> ${selectedPlan.duration_days} days
+        </div>
+        <div class="alert alert-warning">
+            <i class="material-icons-outlined me-2">warning</i>
+            <strong>Important:</strong> This action will immediately deduct ₹${parseFloat(selectedPlan.fixed_amount).toFixed(2)} from your INR wallet and create the investment. This cannot be undone.
+        </div>
+        <div class="alert alert-info">
+            <i class="material-icons-outlined me-2">info</i>
+            <strong>Note:</strong> Your current INR balance: ₹${userWalletBalances.inr.toFixed(2)}
+        </div>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('confirmationModal')).show();
+}
+
+async function confirmInvestment() {
+    try {
+        const modal = bootstrap.Modal.getInstance(document.getElementById('confirmationModal'));
+        modal.hide();
+        
+        showLoading('Processing payment...');
+        
+        let currency, amount;
+        if (selectedPaymentMethod === 'usdt') {
+            currency = 'USDT'; // Use uppercase for backend compatibility
+            // Calculate USDT amount with proper precision
+            const usdtAmount = parseFloat(selectedPlan.fixed_amount) / 83;
+            amount = parseFloat(usdtAmount.toFixed(6));
+            console.log('DEBUG: USDT calculation - INR amount:', selectedPlan.fixed_amount, 'USDT amount:', amount);
+        } else {
+            currency = 'INR'; // Use uppercase for backend compatibility
+            amount = parseFloat(selectedPlan.fixed_amount);
+            console.log('DEBUG: INR amount:', amount);
+        }
+        
+        const requestData = {
+            plan: selectedPlan.id,
+            amount: amount,
+            currency: currency,
+            payment_method: 'direct_payment'
+        };
+        
+        console.log('DEBUG FRONTEND: Sending direct payment with data:', requestData);
+        
+        const response = await apiRequest('/api/v1/investment/investments/', {
+            method: 'POST',
+            body: JSON.stringify(requestData)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showSuccess('Investment created successfully! Your wallet has been debited and the investment is now active.');
+            // Refresh wallet balances
+            await loadWalletBalances();
+            // Redirect to investments page
+            setTimeout(() => {
+                window.location.href = '/auth/investments/';
+            }, 2000);
+        } else {
+            throw new Error(result.detail || result.error || 'Failed to create investment');
+        }
+    } catch (error) {
+        console.error('Error creating investment:', error);
+        showError('Failed to create investment: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+// Utility Functions
+function showLoading(message = 'Loading...') {
+    const loadingHtml = `
+        <div id="loading-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" 
+             style="background-color: rgba(0,0,0,0.5); z-index: 9999;">
+            <div class="card text-center p-4">
+                <div class="card-body">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mb-0">${message}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', loadingHtml);
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+
+function showSuccess(message) {
+    // You can implement a proper toast notification here
+    alert('Success: ' + message);
+}
+
+function showError(message) {
+    // You can implement a proper toast notification here
+    console.error('Error:', message);
+    alert('Error: ' + message);
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,105 @@
+{% load static %}
+<!-- Preloader -->
+<!-- <div id="preloader">
+    <div class="spinner">
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+        <div class="rect4"></div>
+        <div class="rect5"></div>
+    </div>
+</div> -->
+<!-- Preloader -->
+
+<!-- header-area -->
+<header id="header">
+    <div id="header-fixed-height"></div>
+    <div id="sticky-header" class="menu-area">
+        <div class="container custom-container">
+            <div class="row">
+                <div class="col-12">
+                    <div class="mobile-nav-toggler"><i class="fas fa-bars"></i></div>
+                    <div class="menu-wrap">
+                        <nav class="menu-nav">
+                            <div class="logo">
+                                <a href="/"><img src="{% static 'assets/img/logo/logo.png' %}" alt=""></a>
+                            </div>
+                            <div class="navbar-wrap main-menu d-none d-lg-flex">
+                                <ul class="navigation">
+                                    <li class="active menu-item-has-children">
+                                        <a href="#header" class="section-link">Home</a>
+                                    </li>
+                                    <li><a href="#about" class="section-link">About us</a></li>
+                                    <li><a href="#sales" class="section-link">Sales</a></li>
+                                    <li><a href="#roadmap" class="section-link">Roadmap</a></li>
+                                    <li class="menu-item-has-children"><a href="#">Blog's</a>
+                                        <ul class="sub-menu">
+                                            {% for category in categories %}
+                                            <li class="menu-item-has-children">
+                                                <a href="#">{{ category.category }}</a>
+                                                {% with category.subcategory_set.all|dictsort:"order" as subcategories %}
+                                                {% if subcategories %}
+                                                <ul class="sub-menu">
+                                                    {% for sub in subcategories %}
+                                                    <li>
+                                                        <a href="{% url 'blog_list_by_subcategory' category.slug sub.slug %}">
+                                                            {{ sub.sub_category }}
+                                                        </a>
+                                                    </li>
+                                                    {% endfor %}
+                                                </ul>
+                                                {% endif %}
+                                                {% endwith %}
+                                            </li>
+                                            {% endfor %}
+                                        </ul>
+                                    </li>
+
+                                    <li><a href="{% url 'contact-us' %}" class="section-link">Contact us</a></li>
+                                </ul>
+                            </div>
+                            <div class="header-action d-none d-md-block">
+                                <ul>
+                                <li class="header-lang"></li>
+                                {% if user.is_authenticated %}
+                                    <li class="header-btn">
+                                        <a href="{% url 'dashboard' %}" class="btn">Dashboard</a>
+                                    </li>
+                                {% else %}
+                                    <li class="header-btn">
+                                        <a href="{% url 'login' %}" class="btn btn-outline-primary me-2">Login</a>
+                                        <a href="{% url 'sign-up' %}" class="btn btn-primary">Register</a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                            </div>
+                        </nav>
+                    </div>
+                    <!-- Mobile Menu  -->
+                    <div class="mobile-menu">
+                        <nav class="menu-box">
+                            <div class="close-btn"><i class="fas fa-times"></i></div>
+                            <div class="nav-logo"><a href="/"><img src="assets/img/logo/logo.png" alt="" title=""></a>
+                            </div>
+                            <div class="menu-outer">
+                                <!--Here Menu Will Come Automatically Via Javascript / Same Menu as in Header-->
+                            </div>
+                            <div class="social-links">
+                                <ul class="clearfix">
+                                    <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
+                                    <li><a href="#"><i class="fab fa-twitter"></i></a></li>
+                                    <li><a href="#"><i class="fab fa-instagram"></i></a></li>
+                                    <li><a href="#"><i class="fab fa-linkedin-in"></i></a></li>
+                                    <li><a href="#"><i class="fab fa-youtube"></i></a></li>
+                                </ul>
+                            </div>
+                        </nav>
+                    </div>
+                    <div class="menu-backdrop"></div>
+                    <!-- End Mobile Menu -->
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<!-- header-area-end -->

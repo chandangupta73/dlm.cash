@@ -1,0 +1,209 @@
+INVESTMENT SYSTEM BACKEND DIRECTORY STRUCTURE
+==============================================
+
+ROOT DIRECTORY: investment_system/ (Main Backend)
+├── .env                                           # Environment configuration (2.3KB)
+├── .github/                                       # GitHub workflows and configurations
+├── .pytest_cache/                                 # Pytest cache directory
+├── __pycache__/                                   # Python cache files
+├── app/                                           # Main application directory
+│   ├── admin_panel/                               # Admin panel application
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── migrations/                            # Database migrations
+│   │   └── tests/                                 # Admin panel tests
+│   ├── api/                                       # API endpoints and views
+│   │   └── v1/                                    # API version 1
+│   │       └── [API endpoint files]
+│   ├── core/                                      # Core application components
+│   │   ├── __init__.py
+│   │   ├── apps.py
+│   │   └── signals.py                             # Django signals
+│   ├── crud/                                      # CRUD operations
+│   │   ├── __init__.py
+│   │   └── wallet.py                              # Wallet CRUD operations
+│   ├── database/                                  # Database configuration
+│   │   └── __init__.py
+│   ├── investment/                                # Investment application
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── migrations/                            # Investment migrations
+│   │   ├── tests/                                 # Investment tests
+│   │   └── [other investment files]
+│   ├── kyc/                                       # KYC (Know Your Customer) application
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── migrations/                            # KYC migrations
+│   │   ├── tests/                                 # KYC tests
+│   │   └── [other KYC files]
+│   ├── models/                                    # Database models
+│   ├── referral/                                  # Referral system application
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── migrations/                            # Referral migrations
+│   │   ├── tests/                                 # Referral tests
+│   │   └── [other referral files]
+│   ├── schemas/                                   # Data schemas and serializers
+│   │   ├── __init__.py
+│   │   └── wallet.py                              # Wallet schemas
+│   ├── services/                                  # Business logic services
+│   │   ├── __init__.py
+│   │   └── real_wallet_service.py                 # Real wallet service
+│   ├── support/                                   # Support system
+│   ├── tests/                                     # Application tests
+│   ├── transactions/                              # Transaction management
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── management/                            # Management commands
+│   │   ├── migrations/                            # Transaction migrations
+│   │   ├── tests/                                 # Transaction tests
+│   │   └── [other transaction files]
+│   ├── users/                                     # User management application
+│   │   ├── __init__.py
+│   │   ├── admin.py
+│   │   ├── apps.py
+│   │   ├── migrations/                            # User migrations
+│   │   ├── tests/                                 # User tests
+│   │   └── [other user files]
+│   ├── utils/                                     # Utility functions
+│   └── wallet/                                    # Wallet management application
+│       ├── __init__.py
+│       ├── admin.py
+│       ├── apps.py
+│       ├── migrations/                            # Wallet migrations
+│       ├── tests/                                 # Wallet tests
+│       └── [other wallet files]
+├── investment_system/                             # Main project configuration
+│   ├── __init__.py
+│   ├── asgi.py                                    # ASGI configuration
+│   ├── settings.py                                # Django settings (7.2KB)
+│   ├── urls.py                                    # Main URL configuration (1.0KB)
+│   ├── views.py                                   # Main views (1.1KB)
+│   └── wsgi.py                                    # WSGI configuration
+├── media/                                         # Media files (user uploads)
+│   ├── kyc_documents/                             # KYC document uploads
+│   │   └── [UUID-based directories with documents]
+│   └── video_kyc/                                 # Video KYC files
+│       └── [42 directories]
+├── static/                                        # Static files
+├── tests/                                         # Comprehensive test suite
+│   ├── __pycache__/                               # Test cache
+│   ├── data_integrity/                            # Data integrity tests
+│   │   └── [data integrity test files]
+│   ├── functional_edge_cases/                     # Edge case testing
+│   │   └── [edge case test files]
+│   ├── integration_readiness/                     # Integration tests
+│   │   └── [integration test files]
+│   ├── investment/                                # Investment-specific tests
+│   │   └── [investment test files]
+│   ├── load_stress/                               # Load and stress testing
+│   │   ├── [load test files]
+│   │   └── [test data files]
+│   ├── security/                                  # Security testing
+│   │   └── [security test files]
+│   ├── complete_fresh_test.py                     # Complete fresh test (14KB)
+│   ├── comprehensive_part1_test.py                # Part 1 comprehensive test (13KB)
+│   ├── comprehensive_part2_test.py                # Part 2 comprehensive test (16KB)
+│   ├── conftest.py                                # Pytest configuration (7.4KB)
+│   ├── database_integrity_check.py                # Database integrity test (14KB)
+│   ├── README.md                                  # Test documentation (8.5KB)
+│   ├── run_all_tests.py                           # Test runner (10KB)
+│   ├── run_tests_simple.py                        # Simple test runner (1.8KB)
+│   ├── test_multi_chain_usdt.py                  # Multi-chain USDT test (13KB)
+│   └── test_usdt_deposit_flow.py                 # USDT deposit flow test (8.3KB)
+├── cleanup_backup/                                # Backup and cleanup documentation
+│   ├── API_ENDPOINT_DOCUMENTATION.md              # API documentation (13KB)
+│   ├── COMPREHENSIVE_CODEBASE_ANALYSIS.md         # Codebase analysis (19KB)
+│   ├── FRESH_SETUP_COMPLETE.md                    # Fresh setup guide (6.5KB)
+│   ├── IMPLEMENTATION_SUMMARY.md                  # Implementation summary (7.8KB)
+│   ├── MANUAL_TESTING_GUIDE.md                    # Manual testing guide (11KB)
+│   ├── MANUAL_TESTING_REAL_WALLET.md              # Real wallet testing (13KB)
+│   ├── MULTI_CHAIN_USDT_IMPLEMENTATION.md         # Multi-chain USDT guide (26KB)
+│   ├── PART1_INTEGRATION_COMPLETE.md              # Part 1 integration status (3.3KB)
+│   ├── PRODUCTION_READY_STATUS.md                 # Production readiness (5.0KB)
+│   ├── REAL_WALLET_IMPLEMENTATION.md              # Real wallet implementation (8.4KB)
+│   ├── REAL_WALLET_INTEGRATION_GUIDE.md           # Real wallet integration (3.8KB)
+│   ├── STATUS.md                                   # Current status (9.4KB)
+│   ├── USDT_DEPOSIT_AUDIT_REPORT.md               # USDT deposit audit (8.3KB)
+│   ├── WALLET_CRUD_UPDATE.md                      # Wallet CRUD updates (2.4KB)
+│   ├── MIGRATION_SUMMARY.md                       # Migration summary (4.8KB)
+│   ├── db_fresh.sqlite3                           # Fresh database backup (440KB)
+│   ├── quick_test.py                              # Quick test script (13KB)
+│   ├── start_testing.py                           # Testing startup script (4.2KB)
+│   ├── test_deposit_simple.ps1                    # Simple deposit test (PowerShell)
+│   ├── test_deposits.ps1                          # Deposit testing (PowerShell)
+│   └── test_with_token.ps1                        # Token-based testing (PowerShell)
+├── backup_part1_docs/                             # Part 1 backup documentation
+│   ├── env_backup.txt                             # Environment backup
+│   ├── KYC_Backend_API.postman_collection.json   # Postman collection
+│   └── README.md                                  # Backup documentation
+├── migration_backup/                               # Migration backup files
+├── htmlcov/                                       # HTML coverage reports
+├── logs/                                          # Application logs
+├── manage.py                                       # Django management script (695B)
+├── pytest.ini                                     # Pytest configuration (501B)
+├── requirements.txt                                # Python dependencies (687B)
+├── .coverage                                       # Coverage data (52KB)
+├── BACKEND_TESTING_STATUS_SUMMARY.txt             # Testing status summary (13KB)
+├── MANUAL_API_TESTING_GUIDE.txt                   # API testing guide (27KB)
+├── PROJECT_CONTEXT.md                              # Project context (2.1KB)
+├── PROJECT_STATUS.md                               # Project status (2.4KB)
+├── README.md                                       # Main README (4.2KB)
+├── referral_implementation.txt                     # Referral implementation (11KB)
+├── run_integration_tests.py                        # Integration test runner (12KB)
+└── transaction_implementation.txt                  # Transaction implementation (16KB)
+
+KEY FEATURES:
+============
+- Django-based investment platform backend
+- Multiple specialized Django apps: admin_panel, investment, kyc, referral, transactions, users, wallet
+- Comprehensive API system with versioning (v1)
+- Advanced testing infrastructure with multiple test categories
+- Real wallet integration and multi-chain USDT support
+- KYC document management and video verification
+- Referral system implementation
+- Transaction management and wallet operations
+- Extensive documentation and implementation guides
+- Production-ready status with comprehensive testing
+
+TECHNOLOGY STACK:
+=================
+- Django (Python web framework)
+- Django REST Framework (API)
+- SQLite database with migration support
+- Pytest testing framework
+- ASGI/WSGI support
+- Real wallet blockchain integration
+- Multi-chain cryptocurrency support
+- KYC verification system
+- Referral and transaction management
+- Comprehensive logging and monitoring
+
+ARCHITECTURE PATTERNS:
+======================
+- Modular Django app architecture
+- API-first design with versioning
+- Service layer for business logic
+- CRUD operations abstraction
+- Signal-based event handling
+- Comprehensive testing strategy
+- Documentation-driven development
+- Backup and migration management
+
+NOTES:
+======
+- The backend is production-ready with extensive testing coverage
+- Multi-chain USDT implementation is complete and tested
+- Real wallet integration provides blockchain connectivity
+- Comprehensive KYC system with document and video verification
+- Extensive documentation covers all implementation aspects
+- Testing infrastructure covers functional, security, load, and integration testing
+- Migration system ensures database schema evolution
+- Backup systems protect against data loss
+- PowerShell scripts available for Windows-based testing
+- Coverage reporting provides quality metrics

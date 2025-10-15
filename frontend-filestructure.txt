@@ -1,0 +1,182 @@
+INVESTMENT-FRONTEND DIRECTORY STRUCTURE
+========================================
+
+ROOT DIRECTORY: investment-frontend/
+├── .vscode/                                    # VS Code configuration
+├── accounts/                                   # User accounts app
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── migrations/                             # Database migrations
+│   └── [other Python files]
+├── admin_access_info.md                        # Admin access documentation
+├── backend/                                    # Backend configuration
+│   ├── app/
+│   └── investment_system/
+├── backup_part1_docs/                          # Backup documentation
+│   ├── env_backup.txt
+│   ├── KYC_Backend_API.postman_collection.json
+│   └── README.md
+├── Blogs/                                      # Blog application
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── migrations/
+│   └── [other Python files]
+├── core_communication/                         # Communication app
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── migrations/
+│   └── [other Python files]
+├── db.sqlite3                                  # SQLite database (764KB)
+├── django.txt                                  # Django configuration
+├── dlm/                                        # DLM app
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── asgi.py
+│   └── [other Python files]
+├── investments/                                # Investment app
+│   ├── __init__.py
+│   ├── admin.py
+│   ├── apps.py
+│   ├── migrations/                             # 25 migration files
+│   └── [other Python files]
+├── logs/                                       # Application logs
+│   └── django.log
+├── manage.py                                   # Django management script
+├── media/                                      # User uploaded files
+│   ├── kyc_documents/                         # KYC document uploads
+│   │   └── [UUID-based directories with documents]
+│   ├── media/
+│   ├── profile_pics/                          # User profile pictures
+│   │   └── [13 JPG files]
+│   ├── uploads/
+│   └── video_kyc/                             # Video KYC files
+│       └── [42 directories]
+├── MERGE_SUMMARY.md                            # Merge documentation
+├── PROJECT_CONTEXT.md                          # Project context
+├── PROJECT_STATUS.md                           # Project status
+├── PROJECT_STRUCTURE.md                        # Project structure
+├── README.md                                   # Main README
+├── requirements.txt                            # Python dependencies
+├── setup.py                                    # Setup script
+├── simple_test.py                              # Simple test script
+├── static/                                     # Static files (development)
+│   ├── admin/
+│   ├── assets/
+│   ├── dashboard/
+│   └── [other static assets]
+├── staticfiles/                                # Collected static files (production)
+│   ├── admin/
+│   ├── assets/
+│   ├── ckeditor/                              # Rich text editor
+│   │   ├── css/
+│   │   ├── js/
+│   │   └── [other files]
+│   ├── dashboard/
+│   ├── django_extensions/                      # Django extensions
+│   ├── drf-yasg/                              # DRF YASG (Swagger)
+│   │   ├── redoc/
+│   │   ├── redoc-old/
+│   │   ├── swagger-ui-dist/
+│   │   └── [other files]
+│   ├── flags/                                  # Country flag images (256 files)
+│   │   ├── [252 GIF files]
+│   │   ├── [2 CSS files]
+│   │   └── [2 PNG files]
+│   └── rest_framework/                         # DRF static files
+│       ├── css/
+│       ├── docs/
+│       ├── fonts/
+│       ├── img/
+│       └── js/
+├── templates/                                  # HTML templates
+│   ├── admin/                                  # Admin templates
+│   │   ├── analytics.html
+│   │   ├── dashboard.html
+│   │   └── reports.html
+│   ├── base.html                               # Base template
+│   ├── blog-details.html                       # Blog detail template
+│   ├── contact.html                            # Contact page template
+│   ├── dashboard.html                          # Dashboard template
+│   ├── footer.html                             # Footer template
+│   ├── forgot_password.html                    # Password reset template
+│   ├── head.html                               # Head section template
+│   ├── header.html                             # Header template
+│   ├── index.html                              # Main index template
+│   ├── login.html                              # Login template
+│   ├── Plans.html                              # Investment plans template
+│   ├── profile.html                            # User profile template
+│   ├── registration.html                       # Registration template
+│   ├── reset_password.html                     # Password reset template
+│   ├── right_colum.html                        # Right column template
+│   ├── select_buy_option.html                  # Buy option selection
+│   ├── subcategory_blog_list.html              # Blog list template
+│   ├── test.html                               # Test template
+│   ├── user_base.html                          # User base template
+│   └── user_menu.html                          # User menu template
+├── test_blockchain_features.py                 # Blockchain testing
+├── test_chain_fix.py                           # Chain fix testing
+├── test_fixes.py                               # General fixes testing
+├── test_kyc_upload.py                          # KYC upload testing
+├── tests/                                      # Test suite
+│   ├── complete_fresh_test.py                  # Complete fresh test
+│   ├── comprehensive_part1_test.py             # Part 1 comprehensive test
+│   ├── comprehensive_part2_test.py             # Part 2 comprehensive test
+│   ├── database_integrity_check.py             # Database integrity test
+│   ├── README.md                               # Test documentation
+│   ├── test_multi_chain_usdt.py               # Multi-chain USDT test
+│   └── test_usdt_deposit_flow.py              # USDT deposit flow test
+├── UNIFIED_QUICK_START.md                      # Quick start guide
+├── venv/                                       # Virtual environment
+│   ├── Include/
+│   ├── Lib/
+│   │   └── site-packages/
+│   ├── pyvenv.cfg
+│   └── Scripts/
+│       ├── python.exe
+│       └── pythonw.exe
+└── venv_new/                                   # New virtual environment
+    ├── Include/
+    ├── Lib/
+    │   └── site-packages/
+    │       ├── pkg_resources/
+    │       ├── setuptools/
+    │       └── [other packages]
+    ├── pyvenv.cfg
+    └── Scripts/
+        ├── python.exe
+        └── pythonw.exe
+
+KEY FEATURES:
+============
+- Django-based investment platform frontend
+- Multiple Django apps: accounts, blogs, investments, core_communication, dlm
+- Comprehensive testing suite with blockchain and KYC testing
+- Rich static file collection including admin, dashboard, and UI components
+- Multiple virtual environments for development
+- Extensive media handling for KYC documents and user uploads
+- Professional admin interface with analytics and reporting
+- Responsive templates for various user interactions
+- Integration with DRF (Django REST Framework) and Swagger documentation
+
+TECHNOLOGY STACK:
+=================
+- Django (Python web framework)
+- SQLite database
+- Bootstrap (CSS framework)
+- jQuery (JavaScript library)
+- CKEditor (Rich text editor)
+- DRF-YASG (Swagger/OpenAPI documentation)
+- Various UI plugins and components
+- Virtual environment management
+
+NOTES:
+======
+- The directory contains both development and production-ready static files
+- Extensive media handling for KYC verification system
+- Comprehensive testing infrastructure for blockchain features
+- Multiple virtual environments suggest active development
+- Professional-grade admin interface with analytics capabilities
+- Rich collection of UI components and plugins

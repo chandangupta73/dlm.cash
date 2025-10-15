@@ -1,0 +1,457 @@
+{% extends 'dashboard.html' %}
+{% load static %}
+{% block main %}
+
+<!-- Load auth.js for JWT management -->
+<script src="{% static 'assets/js/auth.js' %}"></script>
+
+<!--start main wrapper-->
+<main class="main-wrapper">
+    <div class="main-content">
+
+        <!--breadcrumb-->
+        <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+            <div class="breadcrumb-title pe-3">User</div>
+            <div class="ps-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 p-0">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'dashboard' %}"><i class="bx bx-home-alt"></i></a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'profile' %}">Profile</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">USDT Details</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <!--end breadcrumb-->
+
+        <!-- USDT Details Management -->
+        <div class="row">
+            <div class="col-12 col-xl-8 mx-auto">
+                
+                <!-- USDT Wallet Information Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="material-icons-outlined me-2">account_balance_wallet</i>
+                            USDT Wallet Details
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Current USDT Details Display -->
+                        <div id="usdtDetailsDisplay">
+                            <div class="alert alert-info">
+                                <i class="material-icons-outlined me-2">info</i>
+                                <strong>Important:</strong> USDT wallet details are required for USDT withdrawals. Please ensure the wallet address and network are correct.
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Network</label>
+                                        <div class="form-control" id="displayNetwork">Not provided</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Wallet Address</label>
+                                        <div class="form-control" id="displayWalletAddress">Not provided</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="mb-3">
+                                        <label class="form-label">Status</label>
+                                        <div class="form-control" id="displayStatus">Not verified</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- QR Code Display -->
+                            <div class="text-center mb-3" id="qrCodeDisplay" style="display: none;">
+                                <div class="card border-0 shadow-sm">
+                                    <div class="card-body">
+                                        <h6 class="mb-2">QR Code for USDT Address</h6>
+                                        <img id="displayQRCode" src="" alt="QR Code" class="img-fluid" style="max-width: 200px;">
+                                        <small class="text-muted">Your uploaded QR code for the wallet address</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary" onclick="editUSDTDetails()">
+                                    <i class="material-icons-outlined me-1">edit</i>
+                                    Edit USDT Details
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="verifyUSDTDetails()">
+                                    <i class="material-icons-outlined me-1">verified</i>
+                                    Verify Wallet
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- USDT Details Edit Form -->
+                        <div id="usdtDetailsForm" style="display: none;">
+                            <form id="usdtDetailsEditForm" enctype="multipart/form-data">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="network" class="form-label">Network *</label>
+                                            <select class="form-select" id="network" name="network" required>
+                                                <option value="">Select Network</option>
+                                                <option value="trc20">TRC20 (Tron)</option>
+                                                <option value="erc20">ERC20 (Ethereum)</option>
+                                                <option value="bep20">BEP20 (Binance Smart Chain)</option>
+                                                <option value="polygon">Polygon</option>
+                                                <option value="arbitrum">Arbitrum</option>
+                                                <option value="optimism">Optimism</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="walletAddress" class="form-label">Wallet Address *</label>
+                                            <input type="text" class="form-control" id="walletAddress" name="wallet_address" required placeholder="Enter your USDT wallet address">
+                                            <small class="form-text text-muted">Make sure to double-check the address for accuracy</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-12">
+                                        <div class="mb-3">
+                                            <label for="qrCode" class="form-label">QR Code Image</label>
+                                            <input type="file" class="form-control" id="qrCode" name="qr_code" accept="image/*">
+                                            <small class="form-text text-muted">Upload a QR code image for your wallet address (optional)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="material-icons-outlined me-1">save</i>
+                                        Save USDT Details
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="cancelEdit()">
+                                        <i class="material-icons-outlined me-1">cancel</i>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Verification Status Card -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="material-icons-outlined me-2">verified_user</i>
+                            Wallet Verification Status
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="verificationStatus">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="status-icon">
+                                    <i class="material-icons-outlined text-warning" style="font-size: 32px;">pending</i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Verification Pending</h6>
+                                    <p class="text-muted mb-0">Your USDT wallet details need to be verified before you can make USDT withdrawals.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <h6>Verification Steps:</h6>
+                                <ul class="list-unstyled" id="verificationSteps">
+                                    <li><i class="material-icons-outlined text-success me-2">check_circle</i> Provide USDT wallet address and network</li>
+                                    <li><i class="material-icons-outlined text-muted me-2">radio_button_unchecked</i> Admin verification of wallet details</li>
+                                    <li><i class="material-icons-outlined text-muted me-2">radio_button_unchecked</i> Test transaction verification</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Network Information Card -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="material-icons-outlined me-2">info</i>
+                            Network Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>TRC20 (Tron)</h6>
+                                <ul class="list-unstyled text-muted">
+                                    <li>• Lowest transaction fees</li>
+                                    <li>• Fastest confirmation</li>
+                                    <li>• Recommended for small amounts</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>ERC20 (Ethereum)</h6>
+                                <ul class="list-unstyled text-muted">
+                                    <li>• Most secure network</li>
+                                    <li>• Higher transaction fees</li>
+                                    <li>• Slower confirmation</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <h6>BEP20 (Binance Smart Chain)</h6>
+                                <ul class="list-unstyled text-muted">
+                                    <li>• Low transaction fees</li>
+                                    <li>• Fast confirmation</li>
+                                    <li>• Good balance of cost/speed</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Other Networks</h6>
+                                <ul class="list-unstyled text-muted">
+                                    <li>• Polygon, Arbitrum, Optimism</li>
+                                    <li>• Layer 2 solutions</li>
+                                    <li>• Lower fees than mainnet</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+    </div>
+</main>
+<!--end main wrapper-->
+
+
+
+<script>
+// USDT Details Management
+let userUSDTDetails = null;
+
+// Initialize page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('USDT Details page loaded');
+    
+    // Test if everything is working
+    setTimeout(() => {
+        testUSDTForm();
+    }, 1000);
+    
+    // Setup form
+    setupUSDTDetailsForm();
+    
+    // Load existing USDT details
+    loadUSDTDetails();
+});
+
+async function loadUSDTDetails() {
+    try {
+        // Load user profile which might contain USDT details
+        const response = await apiRequest('/api/v1/profile/');
+        if (response.ok) {
+            const userData = await response.json();
+            
+            // Check if user has USDT details stored
+            if (userData.usdt_details) {
+                userUSDTDetails = userData.usdt_details;
+                displayUSDTDetails(userUSDTDetails);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading USDT details:', error);
+        showError('Failed to load USDT wallet information');
+    }
+}
+
+function displayUSDTDetails(details) {
+    document.getElementById('displayNetwork').textContent = details.network_display_name || details.network || 'Not provided';
+    document.getElementById('displayWalletAddress').textContent = details.wallet_address || 'Not provided';
+    
+    // Display verification status
+    const statusElement = document.getElementById('displayStatus');
+    if (details.is_verified) {
+        statusElement.textContent = 'Verified';
+        statusElement.className = 'form-control text-success';
+        
+        // Update verification steps
+        const steps = document.querySelectorAll('#verificationSteps li');
+        if (steps.length >= 2) {
+            steps[1].innerHTML = '<i class="material-icons-outlined text-success me-2">check_circle</i> Admin verification of wallet details';
+        }
+    } else {
+        statusElement.textContent = 'Not verified';
+        statusElement.className = 'form-control text-warning';
+    }
+    
+    // Show QR code if exists
+    if (details.qr_code) {
+        document.getElementById('displayQRCode').src = details.qr_code;
+        document.getElementById('qrCodeDisplay').style.display = 'block';
+    } else {
+        document.getElementById('qrCodeDisplay').style.display = 'none';
+    }
+}
+
+function editUSDTDetails() {
+    document.getElementById('usdtDetailsDisplay').style.display = 'none';
+    document.getElementById('usdtDetailsForm').style.display = 'block';
+    
+    // Populate form with existing data
+    if (userUSDTDetails) {
+        document.getElementById('network').value = userUSDTDetails.network || '';
+        document.getElementById('walletAddress').value = userUSDTDetails.wallet_address || '';
+    }
+}
+
+function cancelEdit() {
+    document.getElementById('usdtDetailsForm').style.display = 'none';
+    document.getElementById('usdtDetailsDisplay').style.display = 'block';
+    
+    // Reset form
+    document.getElementById('usdtDetailsEditForm').reset();
+}
+
+function setupUSDTDetailsForm() {
+    console.log('Setting up USDT details form...');
+    
+    const form = document.getElementById('usdtDetailsEditForm');
+    if (!form) {
+        console.error('Form not found!');
+        return;
+    }
+    
+    form.addEventListener('submit', async function(e) {
+        console.log('Form submission triggered!');
+        e.preventDefault();
+        
+        // Debug: Check if apiRequest function is available
+        if (typeof apiRequest === 'undefined') {
+            console.error('apiRequest function is not defined!');
+            showError('System error: API request function not available');
+            return;
+        }
+        
+        console.log('apiRequest function is available');
+        
+        const formData = new FormData(this);
+        
+        // Debug: Log form data
+        console.log('Form data being sent:');
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
+        }
+        
+        // Check if required fields are filled
+        const network = formData.get('network');
+        const walletAddress = formData.get('wallet_address');
+        
+        if (!network || !walletAddress) {
+            console.error('Required fields missing:', { network, walletAddress });
+            showError('Please fill in all required fields');
+            return;
+        }
+        
+        console.log('All required fields are filled, proceeding with API call...');
+        
+        try {
+            console.log('Making API call to:', '/api/v1/usdt-details/');
+            
+            // Call the backend API on port 8000
+            const response = await apiRequest('/api/v1/usdt-details/', {
+                method: 'POST',
+                body: formData
+            });
+            
+            console.log('Response received:', response);
+            console.log('Response status:', response.status);
+            console.log('Response ok:', response.ok);
+            
+            if (response.ok) {
+                const savedDetails = await response.json();
+                console.log('Saved details:', savedDetails);
+                userUSDTDetails = savedDetails;
+                displayUSDTDetails(savedDetails);
+                cancelEdit();
+                showSuccess('USDT details updated successfully!');
+            } else {
+                const errorData = await response.json();
+                console.log('Error data:', errorData);
+                showError(errorData.message || 'Failed to update USDT details');
+            }
+        } catch (error) {
+            console.error('Error updating USDT details:', error);
+            showError('Failed to update USDT details: ' + error.message);
+        }
+    });
+    
+    console.log('USDT details form setup complete');
+}
+
+// Test function to check if everything is working
+function testUSDTForm() {
+    console.log('Testing USDT form...');
+    console.log('Form element:', document.getElementById('usdtDetailsEditForm'));
+    console.log('apiRequest function:', typeof apiRequest);
+    console.log('AuthManager:', typeof AuthManager);
+    
+    if (typeof apiRequest === 'undefined') {
+        console.error('❌ apiRequest function is not available');
+    } else {
+        console.log('✅ apiRequest function is available');
+    }
+    
+    if (typeof AuthManager === 'undefined') {
+        console.error('❌ AuthManager is not available');
+    } else {
+        console.log('✅ AuthManager is available');
+    }
+}
+
+async function verifyUSDTDetails() {
+    if (!userUSDTDetails || !userUSDTDetails.wallet_address) {
+        showError('Please add your USDT wallet details first');
+        return;
+    }
+    
+    try {
+        showInfo('Verification request submitted. Admin will review your USDT wallet details within 24 hours.');
+        
+        // Here you could make an API call to request verification
+        // const response = await apiRequest('/api/v1/verify-usdt-details/', {
+        //     method: 'POST'
+        // });
+        
+    } catch (error) {
+        console.error('Error requesting verification:', error);
+        showError('Failed to submit verification request');
+    }
+}
+
+// Utility functions for notifications
+function showSuccess(message) {
+    // Implementation depends on your notification system
+    alert('Success: ' + message);
+}
+
+function showError(message) {
+    // Implementation depends on your notification system
+    alert('Error: ' + message);
+}
+
+function showInfo(message) {
+    // Implementation depends on your notification system
+    alert('Info: ' + message);
+}
+</script>
+
+{% endblock %}

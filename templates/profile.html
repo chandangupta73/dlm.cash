@@ -1,0 +1,270 @@
+{% extends 'dashboard.html' %}
+{% load static %}
+{% block main %}
+
+<!-- Load auth.js for JWT management -->
+<script src="{% static 'assets/js/auth.js' %}"></script>
+
+<!--start main wrapper-->
+<main class="main-wrapper">
+    <div class="main-content">
+
+        <!--breadcrumb-->
+        <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+            <div class="breadcrumb-title pe-3">User</div>
+            <div class="ps-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 p-0">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'dashboard' %}"><i class="bx bx-home-alt"></i></a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Profile</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <!--end breadcrumb-->
+
+        <!-- User Profile Card -->
+        <div class="card profile-card mx-auto">
+            <div class="d-flex justify-content-center mt-n5">
+                <div class="position-relative" style="width: 120px; height: 120px;">
+                    {% if user.profile_pic %}
+                    <img src="{{ user.profile_pic.url }}" alt="Profile Picture"
+                        class="rounded-circle shadow w-100 h-100" style="object-fit: cover; border: 4px solid #fff;">
+                    {% else %}
+                    <img src="{% static 'dashboard/assets/images/dflt_user_pic.jpg' %}" alt="Default"
+                        class="rounded-circle shadow w-100 h-100" style="object-fit: cover; border: 4px solid #fff;">
+                    {% endif %}
+
+                    <!-- Clean camera icon, no background -->
+                    <i class="material-icons text-muted position-absolute"
+                        style="bottom: 0; left: 78%; transform: translateX(-50%); font-size: 24px; cursor: pointer;"
+                        onclick="openPicModal()" title="Change Picture">
+                        photo_camera
+                    </i>
+                </div>
+            </div>
+
+
+            <div class="card-body">
+                <div class="row g-3">
+
+                    <!-- Username (Non-Editable) -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted">Username</label>
+                        <div class="d-flex align-items-center">
+                            <div>{{ user.username }}</div>
+                        </div>
+                    </div>
+
+                    <!-- Email -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted">Email</label>
+                        <div class="d-flex align-items-center">
+                            <div>{{ user.email }}</div>
+                            <i style="font-size: 15px;" class="material-icons text-muted cursor-pointer mx-3"
+                                onclick="openEditModal('email', '{{ user.email }}')">edit</i>
+                        </div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted">Phone</label>
+                        <div class="d-flex align-items-center">
+                            <div>{{ user.phone }}</div>
+                            <i style="font-size: 15px;" class="material-icons text-muted cursor-pointer mx-3"
+                                onclick="openEditModal('phone', '{{ user.phone }}')">edit</i>
+                        </div>
+                    </div>
+
+                    <!-- Country -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted">Country</label>
+                        <div class="d-flex align-items-center">
+                            <div>{{ user.country }}</div>
+                            <i style="font-size: 15px;" class="material-icons text-muted cursor-pointer mx-3"
+                                onclick="openEditModal('country', '{{ user.country }}')">edit</i>
+                        </div>
+                    </div>
+
+                    <!-- State -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted">State</label>
+                        <div class="d-flex align-items-center">
+                            <div>{{ user.state }}</div>
+                            <i style="font-size: 15px;" class="material-icons text-muted cursor-pointer mx-3"
+                                onclick="openEditModal('state', '{{ user.state }}')">edit</i>
+                        </div>
+                    </div>
+
+                    <!-- City -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted">City / Address</label>
+                        <div class="d-flex align-items-center">
+                            <div>{{ user.city }}</div>
+                            <i style="font-size: 15px;" class="material-icons text-muted cursor-pointer mx-3"
+                                onclick="openEditModal('city', '{{ user.city }}')">edit</i>
+                        </div>
+                    </div>
+
+                    <!-- Referral Code (Non-Editable) -->
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold text-muted">Referral Code</label>
+                        <div class="d-flex align-items-center py-1">
+                            <span id="referralCode">{{ user.referral_code }}</span>
+                            <i style="font-size: 15px;" class="material-icons-outlined text-muted ms-2" style="cursor: pointer;"
+                                onclick="copyReferralCode()">content_copy</i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+        <!-- End Profile Card -->
+
+    </div>
+</main>
+<!--end main wrapper-->
+
+<!-- Text Edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" id="profileForm">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModalLabel">
+                        <i class="material-icons text-muted align-middle">edit</i>
+                        <span id="modalFieldName" class="ms-1"></span>
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="field_name" id="field_name_input">
+                    <input type="text" class="form-control" name="field_value" id="field_value_input" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Profile Picture Modal -->
+<div class="modal fade" id="picModal" tabindex="-1" aria-labelledby="picModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="{% url 'edit_profile_picture' %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="picModalLabel">
+                        <i class="material-icons text-muted align-middle">edit</i>
+                        Update Profile Picture
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="file" name="profile_pic" class="form-control" accept="image/*" required>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Upload</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+<script>
+    function copyReferralCode() {
+        const codeText = document.getElementById('referralCode').innerText;
+        navigator.clipboard.writeText(codeText).then(() => {
+            alert('Referral code copied!');
+        });
+    }
+
+    function openEditModal(field, value) {
+        document.getElementById('modalFieldName').innerText = field.replace('_', ' ').toUpperCase();
+        document.getElementById('field_name_input').value = field;
+        document.getElementById('field_value_input').value = value;
+        new bootstrap.Modal(document.getElementById('editModal')).show();
+    }
+
+    function openPicModal() {
+        new bootstrap.Modal(document.getElementById('picModal')).show();
+    }
+
+    // Load user profile data from backend
+    async function loadUserProfile() {
+        try {
+            const response = await apiRequest('/api/v1/profile/');
+            const data = await response.json();
+            
+            // Update profile fields
+            if (data.first_name) document.getElementById('firstName').textContent = data.first_name;
+            if (data.last_name) document.getElementById('lastName').textContent = data.last_name;
+            if (data.email) document.getElementById('userEmail').textContent = data.email;
+            if (data.phone_number) document.getElementById('userPhone').textContent = data.phone_number;
+            if (data.referral_code) document.getElementById('referralCode').textContent = data.referral_code;
+            
+            console.log('User profile loaded:', data);
+        } catch (error) {
+            console.error('Error loading user profile:', error);
+            
+            // Fallback: try getting user data from login response
+            const userString = localStorage.getItem('user_data');
+            if (userString) {
+                try {
+                    const userData = JSON.parse(userString);
+                    if (userData.first_name) document.getElementById('firstName').textContent = userData.first_name;
+                    if (userData.last_name) document.getElementById('lastName').textContent = userData.last_name;
+                    if (userData.email) document.getElementById('userEmail').textContent = userData.email;
+                    if (userData.phone_number) document.getElementById('userPhone').textContent = userData.phone_number;
+                } catch (e) {
+                    console.error('Error parsing stored user data:', e);
+                }
+            }
+        }
+    }
+
+    // Load referral statistics
+    async function loadReferralStats() {
+        try {
+            const response = await apiRequest('http://localhost:8000/api/v1/referrals/profile/');
+            const data = await response.json();
+            
+            // Update referral stats
+            if (data.referral_code) document.getElementById('referralCode').textContent = data.referral_code;
+            if (data.total_referrals !== undefined) {
+                const totalReferralsElement = document.querySelector('.total-referrals');
+                if (totalReferralsElement) totalReferralsElement.textContent = data.total_referrals;
+            }
+            if (data.total_earnings) {
+                const totalEarningsElement = document.querySelector('.total-earnings');
+                if (totalEarningsElement) totalEarningsElement.textContent = `₹${data.total_earnings}`;
+            }
+            
+            console.log('Referral stats loaded:', data);
+        } catch (error) {
+            console.error('Error loading referral stats:', error);
+        }
+    }
+
+    // Load profile data on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        if (AuthManager.isAuthenticated()) {
+            loadUserProfile();
+            loadReferralStats();
+        } else {
+            // Redirect to login if not authenticated
+            window.location.href = '/auth/login/';
+        }
+    });
+</script>
+
+{% endblock %}

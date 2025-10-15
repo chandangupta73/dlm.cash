@@ -1,0 +1,333 @@
+{% extends 'dashboard.html' %}
+{% load static %}
+{% block main %}
+
+<!-- Load auth.js for JWT management -->
+<script src="{% static 'assets/js/auth.js' %}"></script>
+
+<!--start main wrapper-->
+<main class="main-wrapper">
+    <div class="main-content">
+
+        <!--breadcrumb-->
+        <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+            <div class="breadcrumb-title pe-3">User</div>
+            <div class="ps-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 p-0">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'dashboard' %}"><i class="bx bx-home-alt"></i></a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'profile' %}">Profile</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">Bank Details</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <!--end breadcrumb-->
+
+        <!-- Bank Details Management -->
+        <div class="row">
+            <div class="col-12 col-xl-8 mx-auto">
+                
+                <!-- Bank Account Information Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="material-icons-outlined me-2">account_balance</i>
+                            Bank Account Details
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        
+                        <!-- Current Bank Details Display -->
+                        <div id="bankDetailsDisplay">
+                            <div class="alert alert-info">
+                                <i class="material-icons-outlined me-2">info</i>
+                                <strong>Important:</strong> Bank details are required for INR withdrawals and deposits. Please ensure all information is accurate.
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Account Holder Name</label>
+                                        <div class="form-control" id="displayAccountHolder">Not provided</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Account Number</label>
+                                        <div class="form-control" id="displayAccountNumber">Not provided</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">IFSC Code</label>
+                                        <div class="form-control" id="displayIfscCode">Not provided</div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Bank Name</label>
+                                        <div class="form-control" id="displayBankName">Not provided</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-primary" onclick="editBankDetails()">
+                                    <i class="material-icons-outlined me-1">edit</i>
+                                    Edit Bank Details
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" onclick="verifyBankDetails()">
+                                    <i class="material-icons-outlined me-1">verified</i>
+                                    Verify Account
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Bank Details Edit Form -->
+                        <div id="bankDetailsForm" style="display: none;">
+                            <form id="bankDetailsEditForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                                                             <div class="mb-3">
+                                         <label for="accountHolderName" class="form-label">Account Holder Name *</label>
+                                         <input type="text" class="form-control" id="accountHolderName" name="accountHolderName" required>
+                                     </div>
+                                 </div>
+                                 <div class="col-md-6">
+                                     <div class="mb-3">
+                                         <label for="accountNumber" class="form-label">Account Number *</label>
+                                         <input type="text" class="form-control" id="accountNumber" name="accountNumber" required>
+                                     </div>
+                                 </div>
+                                 <div class="col-md-6">
+                                     <div class="mb-3">
+                                         <label for="ifscCode" class="form-label">IFSC Code *</label>
+                                         <input type="text" class="form-control" id="ifscCode" name="ifscCode" required style="text-transform: uppercase;">
+                                     </div>
+                                 </div>
+                                 <div class="col-md-6">
+                                     <div class="mb-3">
+                                         <label for="bankName" class="form-label">Bank Name *</label>
+                                         <input type="text" class="form-control" id="bankName" name="bankName" required>
+                                     </div>
+                                 </div>
+                                 <div class="col-12">
+                                     <div class="mb-3">
+                                         <label for="branchAddress" class="form-label">Branch Address</label>
+                                         <textarea class="form-control" id="branchAddress" name="branchAddress" rows="2" placeholder="Optional: Branch address for verification"></textarea>
+                                     </div>
+                                 </div>
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="material-icons-outlined me-1">save</i>
+                                        Save Bank Details
+                                    </button>
+                                    <button type="button" class="btn btn-outline-secondary" onclick="cancelEdit()">
+                                        <i class="material-icons-outlined me-1">cancel</i>
+                                        Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Verification Status Card -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="material-icons-outlined me-2">verified_user</i>
+                            Account Verification Status
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="verificationStatus">
+                            <div class="d-flex align-items-center gap-3">
+                                <div class="status-icon">
+                                    <i class="material-icons-outlined text-warning" style="font-size: 32px;">pending</i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Verification Pending</h6>
+                                    <p class="text-muted mb-0">Your bank account details need to be verified before you can make withdrawals.</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <h6>Verification Steps:</h6>
+                                <ul class="list-unstyled">
+                                    <li><i class="material-icons-outlined text-success me-2">check_circle</i> Provide bank account details</li>
+                                    <li><i class="material-icons-outlined text-muted me-2">radio_button_unchecked</i> Admin verification of account details</li>
+                                    <li><i class="material-icons-outlined text-muted me-2">radio_button_unchecked</i> Test transaction verification</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recent Transactions Card -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">
+                            <i class="material-icons-outlined me-2">receipt_long</i>
+                            Recent Bank Transactions
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="bankTransactions">
+                            <div class="text-center text-muted py-4">
+                                <i class="material-icons-outlined" style="font-size: 48px;">receipt</i>
+                                <p class="mt-2">No bank transactions found</p>
+                                <small>Deposit and withdrawal transactions will appear here</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+            </div>
+        </div>
+
+    </div>
+</main>
+<!--end main wrapper-->
+
+<script>
+// Bank Details Management
+let userBankDetails = null;
+
+document.addEventListener('DOMContentLoaded', function() {
+    loadBankDetails();
+    setupBankDetailsForm();
+});
+
+async function loadBankDetails() {
+    try {
+        // Load user profile which might contain bank details
+        const response = await apiRequest('/api/v1/profile/');
+        if (response.ok) {
+            const userData = await response.json();
+            
+            // Check if user has bank details stored
+            if (userData.bank_details) {
+                userBankDetails = userData.bank_details;
+                displayBankDetails(userBankDetails);
+            }
+        }
+    } catch (error) {
+        console.error('Error loading bank details:', error);
+        showError('Failed to load bank account information');
+    }
+}
+
+function displayBankDetails(details) {
+    document.getElementById('displayAccountHolder').textContent = details.account_holder_name || 'Not provided';
+    document.getElementById('displayAccountNumber').textContent = details.account_number ? maskAccountNumber(details.account_number) : 'Not provided';
+    document.getElementById('displayIfscCode').textContent = details.ifsc_code || 'Not provided';
+    document.getElementById('displayBankName').textContent = details.bank_name || 'Not provided';
+}
+
+function maskAccountNumber(accountNumber) {
+    if (!accountNumber) return 'Not provided';
+    const visible = accountNumber.slice(-4);
+    const masked = '*'.repeat(Math.max(0, accountNumber.length - 4));
+    return masked + visible;
+}
+
+function editBankDetails() {
+    document.getElementById('bankDetailsDisplay').style.display = 'none';
+    document.getElementById('bankDetailsForm').style.display = 'block';
+    
+    // Populate form with existing data
+    if (userBankDetails) {
+        document.getElementById('accountHolderName').value = userBankDetails.account_holder_name || '';
+        document.getElementById('accountNumber').value = userBankDetails.account_number || '';
+        document.getElementById('ifscCode').value = userBankDetails.ifsc_code || '';
+        document.getElementById('bankName').value = userBankDetails.bank_name || '';
+        document.getElementById('branchAddress').value = userBankDetails.branch_address || '';
+    }
+}
+
+function cancelEdit() {
+    document.getElementById('bankDetailsForm').style.display = 'none';
+    document.getElementById('bankDetailsDisplay').style.display = 'block';
+}
+
+function setupBankDetailsForm() {
+    document.getElementById('bankDetailsEditForm').addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        const bankDetails = {
+            account_holder_name: formData.get('accountHolderName'),
+            account_number: formData.get('accountNumber'),
+            ifsc_code: formData.get('ifscCode').toUpperCase(),
+            bank_name: formData.get('bankName'),
+            branch_address: formData.get('branchAddress')
+        };
+        
+        try {
+            const response = await apiRequest('/api/v1/bank-details/', {
+                method: 'POST',
+                body: JSON.stringify(bankDetails)
+            });
+            
+            if (response.ok) {
+                userBankDetails = bankDetails;
+                displayBankDetails(bankDetails);
+                cancelEdit();
+                showSuccess('Bank details updated successfully!');
+            } else {
+                const errorData = await response.json();
+                showError(errorData.message || 'Failed to update bank details');
+            }
+        } catch (error) {
+            console.error('Error updating bank details:', error);
+            showError('Failed to update bank details');
+        }
+    });
+}
+
+async function verifyBankDetails() {
+    if (!userBankDetails || !userBankDetails.account_number) {
+        showError('Please add your bank details first');
+        return;
+    }
+    
+    try {
+        showInfo('Verification request submitted. Admin will review your bank details within 24 hours.');
+        
+        // Here you could make an API call to request verification
+        // const response = await apiRequest('/api/v1/verify-bank-details/', {
+        //     method: 'POST'
+        // });
+        
+    } catch (error) {
+        console.error('Error requesting verification:', error);
+        showError('Failed to submit verification request');
+    }
+}
+
+// Utility functions for notifications
+function showSuccess(message) {
+    // Implementation depends on your notification system
+    alert('Success: ' + message);
+}
+
+function showError(message) {
+    // Implementation depends on your notification system
+    alert('Error: ' + message);
+}
+
+function showInfo(message) {
+    // Implementation depends on your notification system
+    alert('Info: ' + message);
+}
+</script>
+
+{% endblock %}

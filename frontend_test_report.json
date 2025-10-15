@@ -1,0 +1,290 @@
+{
+  "summary": {
+    "total_tests": 31,
+    "passed_tests": 30,
+    "failed_tests": 1,
+    "duration": 3.8975415229797363,
+    "timestamp": "2025-08-14T21:52:38.702767"
+  },
+  "results": [
+    {
+      "test": "Admin Login",
+      "endpoint": "/auth/login/",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 1068
+    },
+    {
+      "test": "User Login",
+      "endpoint": "/auth/login/",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 1068
+    },
+    {
+      "test": "User Registration",
+      "endpoint": "/auth/register/",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "success": true,
+      "response_size": 1098
+    },
+    {
+      "test": "New User Login",
+      "endpoint": "/auth/login/",
+      "method": "POST",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 1086
+    },
+    {
+      "test": "Invalid Login",
+      "endpoint": "/auth/login/",
+      "method": "POST",
+      "status": 400,
+      "expected": 400,
+      "success": true,
+      "response_size": 44
+    },
+    {
+      "test": "User Profile",
+      "endpoint": "/profile/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 438
+    },
+    {
+      "test": "Wallet Balance",
+      "endpoint": "/wallet/balance/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 254
+    },
+    {
+      "test": "Wallet Addresses",
+      "endpoint": "/wallet/addresses/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 107
+    },
+    {
+      "test": "KYC Status",
+      "endpoint": "/kyc/status/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 178
+    },
+    {
+      "test": "User Investments",
+      "endpoint": "/investment/investments/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 52
+    },
+    {
+      "test": "Referral Profile",
+      "endpoint": "/referrals/profile/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 372
+    },
+    {
+      "test": "Transaction History",
+      "endpoint": "/transactions/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 401
+    },
+    {
+      "test": "User Announcements",
+      "endpoint": "/admin/announcements/user/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 1039
+    },
+    {
+      "test": "KYC Status Check",
+      "endpoint": "/kyc/status/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 178
+    },
+    {
+      "test": "Wallet Balance",
+      "endpoint": "/wallet/balance/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 254
+    },
+    {
+      "test": "Create Deposit Request",
+      "endpoint": "/deposit-requests/",
+      "method": "POST",
+      "status": 201,
+      "expected": 201,
+      "success": true,
+      "response_size": 490
+    },
+    {
+      "test": "Create Withdrawal Request",
+      "endpoint": "/withdraw/",
+      "method": "POST",
+      "status": 400,
+      "expected": 201,
+      "success": false,
+      "response_size": 131
+    },
+    {
+      "test": "Get Investment Plans",
+      "endpoint": "/investment/investment-plans/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 1000
+    },
+    {
+      "test": "Get User Investments",
+      "endpoint": "/investment/investments/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 52
+    },
+    {
+      "test": "Get ROI Transactions",
+      "endpoint": "/transactions/?transaction_type=ROI",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 401
+    },
+    {
+      "test": "Referral Profile",
+      "endpoint": "/referrals/profile/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 372
+    },
+    {
+      "test": "Referral Tree",
+      "endpoint": "/referrals/tree/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 198
+    },
+    {
+      "test": "All Transactions",
+      "endpoint": "/transactions/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 401
+    },
+    {
+      "test": "Transactions Page 1",
+      "endpoint": "/transactions/?page=1",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 401
+    },
+    {
+      "test": "INR Transactions",
+      "endpoint": "/transactions/?currency=INR&limit=5",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 52
+    },
+    {
+      "test": "USDT Transactions",
+      "endpoint": "/transactions/?currency=USDT&limit=5",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 401
+    },
+    {
+      "test": "Deposit Transactions",
+      "endpoint": "/transactions/?transaction_type=DEPOSIT",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 401
+    },
+    {
+      "test": "Admin Dashboard Summary",
+      "endpoint": "/admin/dashboard/summary/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 487
+    },
+    {
+      "test": "Admin Users List",
+      "endpoint": "/admin/users/",
+      "method": "GET",
+      "status": 200,
+      "expected": 200,
+      "success": true,
+      "response_size": 4775
+    },
+    {
+      "test": "Unauthorized Access",
+      "endpoint": "/wallet/balance/",
+      "method": "GET",
+      "status": 401,
+      "expected": 401,
+      "success": true,
+      "response_size": 58
+    },
+    {
+      "test": "Invalid Login Data",
+      "endpoint": "/auth/login/",
+      "method": "POST",
+      "status": 400,
+      "expected": 400,
+      "success": true,
+      "response_size": 86
+    }
+  ]
+}

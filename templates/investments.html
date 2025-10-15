@@ -1,0 +1,1117 @@
+{% extends 'user_menu.html' %}
+{% load static %}
+{% block main %}
+<!-- Load auth.js for JWT management -->
+<script src="{% static 'assets/js/auth.js' %}"></script>
+
+<!--start main wrapper-->
+<main class="main-wrapper">
+    <div class="main-content">
+        <!--breadcrumb-->
+        <div class="page-breadcrumb d-none d-sm-flex align-items-center mb-3">
+            <div class="breadcrumb-title pe-3">Investments</div>
+            <div class="ps-3">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 p-0">
+                        <li class="breadcrumb-item"><a href="{% url 'dashboard' %}"><i class="bx bx-home-alt"></i></a></li>
+                        <li class="breadcrumb-item active" aria-current="page">My Investments</li>
+                    </ol>
+                </nav>
+            </div>
+        </div>
+        <!--end breadcrumb-->
+
+        <!-- Investment Summary -->
+        <div class="row mb-4">
+            <div class="col-12 mb-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Investment Summary</h5>
+                    <button class="btn btn-primary btn-sm" onclick="refreshInvestmentData()" title="Refresh Data">
+                        <i class="material-icons-outlined me-2">refresh</i>Refresh
+                    </button>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="avatar avatar-lg bg-primary bg-opacity-10 rounded-circle mx-auto mb-3">
+                            <i class="material-icons-outlined text-primary fs-1">trending_up</i>
+                        </div>
+                        <h4 class="mb-1" id="total-invested">₹0.00</h4>
+                        <p class="text-muted mb-0">Total Invested</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="avatar avatar-lg bg-success bg-opacity-10 rounded-circle mx-auto mb-3">
+                            <i class="material-icons-outlined text-success fs-1">account_balance</i>
+                        </div>
+                        <h4 class="mb-1 text-success" id="total-returns">₹0.00</h4>
+                        <p class="text-muted mb-0">Total Returns</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="avatar avatar-lg bg-info bg-opacity-10 rounded-circle mx-auto mb-3">
+                            <i class="material-icons-outlined text-info fs-1">work_outline</i>
+                        </div>
+                        <h4 class="mb-1" id="active-investments">0</h4>
+                        <p class="text-muted mb-0">Active Investments</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-body text-center">
+                        <div class="avatar avatar-lg bg-warning bg-opacity-10 rounded-circle mx-auto mb-3">
+                            <i class="material-icons-outlined text-warning fs-1">timeline</i>
+                        </div>
+                        <h4 class="mb-1" id="roi-percentage">0%</h4>
+                        <p class="text-muted mb-0">Average ROI</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+
+        <!-- Navigation Tabs -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card border-0 shadow-sm">
+                    <div class="card-header bg-transparent border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <ul class="nav nav-tabs card-header-tabs" id="investmentTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="my-investments-tab" data-bs-toggle="tab" data-bs-target="#my-investments" type="button" role="tab">
+                                        <i class="material-icons-outlined me-2">account_balance_wallet</i>My Investments
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="available-plans-tab" data-bs-toggle="tab" data-bs-target="#available-plans" type="button" role="tab">
+                                        <i class="material-icons-outlined me-2">shopping_cart</i>Available Plans
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="roi-history-tab" data-bs-toggle="tab" data-bs-target="#roi-history" type="button" role="tab">
+                                        <i class="material-icons-outlined me-2">history</i>ROI History
+                                    </button>
+                                </li>
+                            </ul>
+                            <button class="btn btn-outline-primary btn-sm" onclick="refreshInvestmentData()" title="Refresh Investment Data">
+                                <i class="material-icons-outlined">refresh</i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content" id="investmentTabContent">
+                            <!-- My Investments Tab -->
+                            <div class="tab-pane fade show active" id="my-investments" role="tabpanel">
+                                <div id="user-investments-list">
+                                    <div class="text-center text-muted py-4">
+                                        <i class="material-icons-outlined fs-1">hourglass_empty</i>
+                                        <p>Loading your investments...</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Available Plans Tab -->
+                            <div class="tab-pane fade" id="available-plans" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <span class="input-group-text">
+                                                <i class="material-icons-outlined">search</i>
+                                            </span>
+                                            <input type="text" class="form-control" id="plan-search" placeholder="Search investment plans...">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" id="duration-filter">
+                                            <option value="">All Durations</option>
+                                            <option value="30">30 Days</option>
+                                            <option value="60">60 Days</option>
+                                            <option value="90">90 Days</option>
+                                            <option value="180">6 Months</option>
+                                            <option value="365">1 Year</option>
+                                        </select>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <select class="form-select" id="roi-filter">
+                                            <option value="">All ROI Rates</option>
+                                            <option value="5-10">5% - 10%</option>
+                                            <option value="10-15">10% - 15%</option>
+                                            <option value="15-20">15% - 20%</option>
+                                            <option value="20+">20%+</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="available-plans-list">
+                                    <div class="text-center text-muted py-4">
+                                        <i class="material-icons-outlined fs-1">hourglass_empty</i>
+                                        <p>Loading available plans...</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ROI History Tab -->
+                            <div class="tab-pane fade" id="roi-history" role="tabpanel">
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <input type="date" class="form-control" id="date-from" placeholder="From Date">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="date" class="form-control" id="date-to" placeholder="To Date">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <button class="btn btn-primary w-100" onclick="filterROIHistory()">
+                                            <i class="material-icons-outlined me-2">filter_list</i>Filter
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="roi-history-list">
+                                    <div class="text-center text-muted py-4">
+                                        <i class="material-icons-outlined fs-1">hourglass_empty</i>
+                                        <p>Loading ROI history...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+<!--end main wrapper-->
+
+<!-- Investment Purchase Modal -->
+<div class="modal fade" id="purchaseModal" tabindex="-1" aria-labelledby="purchaseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="purchaseModalLabel">
+                    <i class="material-icons-outlined text-success me-2">shopping_cart</i>
+                    Purchase Investment Plan
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="selected-plan-details" class="mb-4">
+                    <!-- Selected plan details will be shown here -->
+                </div>
+                
+                <form id="purchaseForm">
+                    <input type="hidden" id="selected-plan-id" name="plan_id">
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="investment-amount" class="form-label">Investment Amount *</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">₹</span>
+                                    <input type="number" class="form-control" id="investment-amount" name="amount" step="0.01" required>
+                                </div>
+                                <div class="form-text">
+                                    <span id="amount-range">Enter amount between ₹0 - ₹0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="investment-currency" class="form-label">Currency *</label>
+                                <select class="form-select" id="investment-currency" name="currency" required>
+                                    <option value="inr">INR (Indian Rupee)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <h6 class="alert-heading">Investment Summary:</h6>
+                        <div class="row">
+                            <div class="col-6">
+                                <small><strong>Expected Daily ROI:</strong> <span id="daily-roi">₹0.00</span></small>
+                            </div>
+                            <div class="col-6">
+                                <small><strong>Total Expected Return:</strong> <span id="total-return">₹0.00</span></small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-warning">
+                        <i class="material-icons-outlined me-2">warning</i>
+                        <small>Please ensure you have sufficient wallet balance before proceeding. Investments cannot be cancelled once confirmed.</small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="confirmPurchase()">
+                    <i class="material-icons-outlined me-1">check_circle</i>Confirm Purchase
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Investment Details Modal -->
+<div class="modal fade" id="investmentDetailsModal" tabindex="-1" aria-labelledby="investmentDetailsModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="investmentDetailsModalLabel">
+                    <i class="material-icons-outlined text-primary me-2">analytics</i>
+                    Investment Details
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="investment-details-content">
+                    <!-- Investment details will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript for Investment Page -->
+<script>
+let currentInvestments = [];
+let availablePlans = [];
+let filteredPlans = [];
+
+// Initialize investment page on load
+document.addEventListener('DOMContentLoaded', function() {
+    initializeInvestmentPage();
+    setupEventListeners();
+});
+
+
+
+function initializeInvestmentPage() {
+    // Load initial data
+    loadInvestmentSummary();
+    loadUserInvestments();
+    loadAvailablePlans();
+    loadROIHistory();
+    
+    // Add page visibility change listener to refresh data when page becomes visible
+    document.addEventListener('visibilitychange', function() {
+        if (!document.hidden) {
+            loadInvestmentSummary();
+            loadUserInvestments();
+        }
+    });
+    
+    // Add focus event listener to refresh data when window gains focus
+    window.addEventListener('focus', function() {
+        loadInvestmentSummary();
+        loadUserInvestments();
+    });
+    
+    // Set up periodic refresh every 30 seconds to keep data current
+    setInterval(function() {
+        if (!document.hidden) {
+            loadInvestmentSummary();
+            loadUserInvestments();
+        }
+    }, 30000); // 30 seconds
+}
+
+function setupEventListeners() {
+    // Tab change events
+    document.querySelectorAll('[data-bs-toggle="tab"]').forEach(tab => {
+        tab.addEventListener('shown.bs.tab', function (event) {
+            const targetId = event.target.getAttribute('data-bs-target');
+            handleTabChange(targetId);
+        });
+    });
+
+    // Plan filters
+    document.getElementById('plan-search').addEventListener('input', filterPlans);
+    document.getElementById('duration-filter').addEventListener('change', filterPlans);
+    document.getElementById('roi-filter').addEventListener('change', filterPlans);
+
+    // Investment amount calculation
+    document.getElementById('investment-amount').addEventListener('input', calculateReturns);
+}
+
+function handleTabChange(targetId) {
+    switch(targetId) {
+        case '#my-investments':
+            loadInvestmentSummary();
+            loadUserInvestments();
+            break;
+        case '#available-plans':
+            loadAvailablePlans();
+            break;
+        case '#roi-history':
+            loadROIHistory();
+            break;
+    }
+}
+
+
+
+
+
+// Refresh investment data
+function refreshInvestmentData() {
+    // Clear cached data
+    currentInvestments = [];
+    
+    // Refresh all data
+    loadInvestmentSummary();
+    loadUserInvestments();
+    loadAvailablePlans();
+    loadROIHistory();
+    
+    // Show user feedback
+    const button = event.target.closest('button');
+    if (button) {
+        const originalText = button.innerHTML;
+        button.innerHTML = '<i class="material-icons-outlined me-2">check</i>Refreshed!';
+        button.classList.remove('btn-primary');
+        button.classList.add('btn-success');
+        
+        setTimeout(() => {
+            button.innerHTML = originalText;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-primary');
+        }, 2000);
+    }
+}
+
+// API Integration Functions
+async function loadInvestmentSummary() {
+    try {
+        const apiUrl = '/api/v1/investment/investments/';
+        
+        const response = await apiRequest(apiUrl);
+        
+        if (response.ok) {
+            const data = await response.json();
+            const investments = data || [];  // No pagination, direct array
+            
+            // Calculate summary with proper status checking and currency conversion
+            let totalInvested = 0;
+            let totalReturns = 0;
+            let totalROI = 0;
+            let activeCount = 0;
+            
+            investments.forEach((inv) => {
+                const amount = parseFloat(inv.amount || 0);
+                const status = inv.status?.toLowerCase();
+                const currency = inv.currency?.toLowerCase();
+                
+                // Count active investments (case-insensitive)
+                if (status === 'active') {
+                    activeCount++;
+                }
+                
+                // Calculate total invested (convert USDT to INR for consistency)
+                if (currency === 'usdt') {
+                    const usdtAmount = amount * 83; // Convert USDT to INR (1 USDT = ₹83)
+                    totalInvested += usdtAmount;
+                } else {
+                    totalInvested += amount; // INR stays as is
+                }
+                
+                // Calculate returns and ROI
+                totalReturns += parseFloat(inv.roi_accrued || 0);
+                if (inv.plan_roi_rate) {
+                    totalROI += parseFloat(inv.plan_roi_rate);
+                }
+            });
+            
+            const avgROI = investments.length > 0 ? totalROI / investments.length : 0;
+            
+            // Update display
+            document.getElementById('total-invested').textContent = `₹${totalInvested.toFixed(2)}`;
+            document.getElementById('total-returns').textContent = `₹${totalReturns.toFixed(2)}`;
+            document.getElementById('active-investments').textContent = activeCount;
+            document.getElementById('roi-percentage').textContent = `${avgROI.toFixed(1)}%`;
+            
+            currentInvestments = investments;
+        } else {
+            throw new Error(data.detail || 'Failed to load investment summary');
+        }
+    } catch (error) {
+        console.error('Error loading investment summary:', error);
+    }
+}
+
+async function loadUserInvestments() {
+    try {
+        const container = document.getElementById('user-investments-list');
+        container.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading your investments...</p>
+            </div>
+        `;
+
+        const response = await apiRequest('/api/v1/investment/investments/');
+        const data = await response.json();
+        
+        if (response.ok) {
+            updateUserInvestmentsDisplay(data || []);
+        } else {
+            throw new Error(data.detail || 'Failed to load investments');
+        }
+    } catch (error) {
+        console.error('Error loading user investments:', error);
+        document.getElementById('user-investments-list').innerHTML = `
+            <div class="text-center text-danger py-4">
+                <i class="material-icons-outlined fs-1">error</i>
+                <p>Failed to load investments</p>
+                <button class="btn btn-primary" onclick="loadUserInvestments()">Try Again</button>
+            </div>
+        `;
+    }
+}
+
+async function loadAvailablePlans() {
+    try {
+        const container = document.getElementById('available-plans-list');
+        container.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading available plans...</p>
+            </div>
+        `;
+
+        const response = await apiRequest('/api/v1/investment/investment-plans/');
+        const data = await response.json();
+        
+        if (response.ok) {
+            availablePlans = data.results || [];
+            filteredPlans = [...availablePlans];
+            updateAvailablePlansDisplay(filteredPlans);
+        } else {
+            throw new Error(data.detail || 'Failed to load investment plans');
+        }
+    } catch (error) {
+        console.error('Error loading available plans:', error);
+        document.getElementById('available-plans-list').innerHTML = `
+            <div class="text-center text-danger py-4">
+                <i class="material-icons-outlined fs-1">error</i>
+                <p>Failed to load investment plans</p>
+                <button class="btn btn-primary" onclick="loadAvailablePlans()">Try Again</button>
+            </div>
+        `;
+    }
+}
+
+async function loadROIHistory() {
+    try {
+        const container = document.getElementById('roi-history-list');
+        container.innerHTML = `
+            <div class="text-center text-muted py-4">
+                <div class="spinner-border text-primary mb-3" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading ROI history...</p>
+            </div>
+        `;
+
+        const response = await apiRequest('/api/v1/transactions/?transaction_type=ROI');
+        const data = await response.json();
+        
+        if (response.ok) {
+            updateROIHistoryDisplay(data.results || []);
+        } else {
+            throw new Error(data.detail || 'Failed to load ROI history');
+        }
+    } catch (error) {
+        console.error('Error loading ROI history:', error);
+        document.getElementById('roi-history-list').innerHTML = `
+            <div class="text-center text-danger py-4">
+                <i class="material-icons-outlined fs-1">error</i>
+                <p>Failed to load ROI history</p>
+                <button class="btn btn-primary" onclick="loadROIHistory()">Try Again</button>
+            </div>
+        `;
+    }
+}
+
+// Display Update Functions
+function updateUserInvestmentsDisplay(investments) {
+    const container = document.getElementById('user-investments-list');
+    
+    if (investments.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-5">
+                <i class="material-icons-outlined fs-1">trending_up</i>
+                <h5 class="mt-3">No Active Investments</h5>
+                <p>Start your investment journey today!</p>
+                <button class="btn btn-primary" onclick="document.getElementById('available-plans-tab').click()">
+                    <i class="material-icons-outlined me-2">add</i>Browse Investment Plans
+                </button>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div class="row">';
+    investments.forEach(investment => {
+        const statusColor = getInvestmentStatusColor(investment.status);
+        const progress = calculateInvestmentProgress(investment);
+        const dailyROI = calculateDailyROI(investment);
+        
+        html += `
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="card border h-100">
+                    <div class="card-header bg-${statusColor} text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">${investment.plan_name || investment.plan?.name || 'Investment Plan'}</h6>
+                            <span class="badge bg-light text-dark">${investment.status}</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">Investment Amount</small>
+                                <h5 class="mb-0">₹${parseFloat(investment.amount).toFixed(2)}</h5>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">ROI Rate</small>
+                                <h5 class="mb-0 text-success">${investment.plan_roi_rate || investment.plan?.roi_rate || 0}%</h5>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">Duration</small>
+                                <p class="mb-0">${investment.plan_duration_days || investment.plan?.duration_days || 0} days</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Frequency</small>
+                                <p class="mb-0">${investment.plan_frequency || investment.plan?.frequency || 'daily'}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between mb-1">
+                                <small>Progress</small>
+                                <small>${progress.toFixed(1)}%</small>
+                            </div>
+                            <div class="progress" style="height: 6px;">
+                                <div class="progress-bar bg-${statusColor}" style="width: ${progress}%"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-6">
+                                <small class="text-muted">Total ROI Earned</small>
+                                <p class="mb-0 text-success fw-bold">₹${parseFloat(investment.total_roi_earned || 0).toFixed(2)}</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Daily ROI</small>
+                                <p class="mb-0">₹${dailyROI.toFixed(2)}</p>
+                            </div>
+                        </div>
+                        
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <small class="text-muted">Start Date</small>
+                                <p class="mb-0">${investment.start_date ? new Date(investment.start_date).toLocaleDateString() : '-'}</p>
+                            </div>
+                            <div class="col-6">
+                                <small class="text-muted">Maturity Date</small>
+                                <p class="mb-0">${investment.maturity_date ? new Date(investment.maturity_date).toLocaleDateString() : '-'}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <button class="btn btn-outline-primary btn-sm w-100" onclick="viewInvestmentDetails('${investment.id}')">
+                            <i class="material-icons-outlined me-1">visibility</i>View Details
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
+
+function updateAvailablePlansDisplay(plans) {
+    const container = document.getElementById('available-plans-list');
+    
+    if (plans.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-5">
+                <i class="material-icons-outlined fs-1">search_off</i>
+                <h5 class="mt-3">No Plans Found</h5>
+                <p>Try adjusting your search filters</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = '<div class="row">';
+    plans.forEach(plan => {
+        const dailyROI = (parseFloat(plan.roi_rate) / 100) / (plan.frequency === 'daily' ? 1 : 30);
+        
+        html += `
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="card border h-100 plan-card" style="cursor: pointer;" onclick="selectPlan('${plan.id}')">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h6 class="mb-0">${plan.name}</h6>
+                            <span class="badge bg-light text-dark">${plan.status}</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <h3 class="text-primary">${plan.roi_rate}%</h3>
+                            <small class="text-muted">ROI Rate (${plan.frequency})</small>
+                        </div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-6 text-center">
+                                <small class="text-muted">Duration</small>
+                                <p class="mb-0 fw-bold">${plan.duration_days} days</p>
+                            </div>
+                            <div class="col-12 text-center">
+                                <small class="text-muted">Fixed Investment Amount</small>
+                                <p class="mb-0 fw-bold">₹${parseFloat(plan.fixed_amount).toFixed(0)}</p>
+                            </div>
+                        </div>
+                        
+                        ${plan.description ? `
+                        <div class="mb-3">
+                            <small class="text-muted">Description</small>
+                            <p class="mb-0 small">${plan.description}</p>
+                        </div>
+                        ` : ''}
+                        
+                        <div class="alert alert-light">
+                            <small>
+                                <i class="material-icons-outlined me-1" style="font-size: 16px;">calculate</i>
+                                Daily ROI: ~${(dailyROI * 100).toFixed(2)}%
+                            </small>
+                        </div>
+                    </div>
+                                         <div class="card-footer">
+                         <a href="/investment/buy/${plan.id}/" class="btn btn-primary w-100">
+                             <i class="material-icons-outlined me-2">shopping_cart</i>Buy Now
+                         </a>
+                     </div>
+                </div>
+            </div>
+        `;
+    });
+    html += '</div>';
+    
+    container.innerHTML = html;
+}
+
+function updateROIHistoryDisplay(roiTransactions) {
+    const container = document.getElementById('roi-history-list');
+    
+    if (roiTransactions.length === 0) {
+        container.innerHTML = `
+            <div class="text-center text-muted py-5">
+                <i class="material-icons-outlined fs-1">history</i>
+                <h5 class="mt-3">No ROI History</h5>
+                <p>ROI payments will appear here once you start investing</p>
+            </div>
+        `;
+        return;
+    }
+    
+    let html = `
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Date</th>
+                        <th>Investment Plan</th>
+                        <th>ROI Amount</th>
+                        <th>Status</th>
+                        <th>Balance After</th>
+                    </tr>
+                </thead>
+                <tbody>
+    `;
+    
+    roiTransactions.forEach(roi => {
+        const statusColor = getStatusColor(roi.status);
+        
+        html += `
+            <tr>
+                <td>${new Date(roi.created_at).toLocaleDateString()}</td>
+                <td>${roi.description || 'ROI Payment'}</td>
+                <td class="text-success fw-bold">+₹${parseFloat(roi.amount).toFixed(2)}</td>
+                <td><span class="badge bg-${statusColor}">${roi.status}</span></td>
+                <td>₹${parseFloat(roi.balance_after || 0).toFixed(2)}</td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table></div>';
+    container.innerHTML = html;
+}
+
+// Investment Functions
+function selectPlan(planId) {
+    const plan = availablePlans.find(p => p.id === planId);
+    if (!plan) return;
+    
+    // Populate modal with plan details
+    document.getElementById('selected-plan-id').value = planId;
+    document.getElementById('amount-range').textContent = `Fixed amount: ₹${parseFloat(plan.fixed_amount).toFixed(0)}`;
+    document.getElementById('investment-amount').value = plan.fixed_amount;
+    document.getElementById('investment-amount').readOnly = true;
+    
+    // Show plan details
+    document.getElementById('selected-plan-details').innerHTML = `
+        <div class="card bg-light">
+            <div class="card-body">
+                <h6 class="card-title">${plan.name}</h6>
+                <div class="row">
+                    <div class="col-md-3">
+                        <small class="text-muted">ROI Rate</small>
+                        <p class="mb-0 fw-bold">${plan.roi_rate}% ${plan.frequency}</p>
+                    </div>
+                    <div class="col-md-3">
+                        <small class="text-muted">Duration</small>
+                        <p class="mb-0 fw-bold">${plan.duration_days} days</p>
+                    </div>
+                    <div class="col-md-6">
+                        <small class="text-muted">Fixed Amount</small>
+                        <p class="mb-0 fw-bold">₹${parseFloat(plan.fixed_amount).toFixed(0)}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Show modal
+    new bootstrap.Modal(document.getElementById('purchaseModal')).show();
+}
+
+async function confirmPurchase() {
+    const form = document.getElementById('purchaseForm');
+    const formData = new FormData(form);
+    
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    const data = {
+        plan: formData.get('plan_id'),
+        amount: formData.get('amount'),
+        currency: formData.get('currency')
+    };
+    
+    try {
+        showLoading('Processing investment...');
+        const response = await apiRequest('/api/v1/investment/investments/', {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+        
+        const result = await response.json();
+        
+        if (response.ok) {
+            showSuccess('Investment purchased successfully!');
+            bootstrap.Modal.getInstance(document.getElementById('purchaseModal')).hide();
+            form.reset();
+            
+            // Refresh data
+            loadInvestmentSummary();
+            loadUserInvestments();
+        } else {
+            throw new Error(result.detail || result.error || 'Investment purchase failed');
+        }
+    } catch (error) {
+        console.error('Error purchasing investment:', error);
+        showError('Investment purchase failed: ' + error.message);
+    } finally {
+        hideLoading();
+    }
+}
+
+function viewInvestmentDetails(investmentId) {
+    const investment = currentInvestments.find(inv => inv.id === investmentId);
+    if (!investment) return;
+    
+    const progress = calculateInvestmentProgress(investment);
+    const dailyROI = calculateDailyROI(investment);
+    const totalExpectedReturn = parseFloat(investment.amount) * (parseFloat(investment.plan?.roi_rate || 0) / 100);
+    
+    document.getElementById('investment-details-content').innerHTML = `
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Investment Information</h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Plan Name:</strong></td>
+                                <td>${investment.plan?.name || 'N/A'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Investment Amount:</strong></td>
+                                <td>₹${parseFloat(investment.amount).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>ROI Rate:</strong></td>
+                                <td>${investment.plan?.roi_rate || 0}% ${investment.plan?.frequency || 'daily'}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Duration:</strong></td>
+                                <td>${investment.plan?.duration_days || 0} days</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Status:</strong></td>
+                                <td><span class="badge bg-${getInvestmentStatusColor(investment.status)}">${investment.status}</span></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Returns & Progress</h6>
+                    </div>
+                    <div class="card-body">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Daily ROI:</strong></td>
+                                <td class="text-success">₹${dailyROI.toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total ROI Earned:</strong></td>
+                                <td class="text-success">₹${parseFloat(investment.total_roi_earned || 0).toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Expected Total Return:</strong></td>
+                                <td>₹${totalExpectedReturn.toFixed(2)}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Progress:</strong></td>
+                                <td>
+                                    <div class="progress" style="height: 20px;">
+                                        <div class="progress-bar" style="width: ${progress}%">${progress.toFixed(1)}%</div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-3">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">Investment Timeline</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="border rounded p-3">
+                                    <i class="material-icons-outlined text-primary fs-1">play_circle</i>
+                                    <h6 class="mt-2">Start Date</h6>
+                                    <p class="text-muted">${investment.start_date ? new Date(investment.start_date).toLocaleDateString() : 'Not started'}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="border rounded p-3">
+                                    <i class="material-icons-outlined text-warning fs-1">schedule</i>
+                                    <h6 class="mt-2">Current Status</h6>
+                                    <p class="text-muted">${investment.status}</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="border rounded p-3">
+                                    <i class="material-icons-outlined text-success fs-1">flag</i>
+                                    <h6 class="mt-2">Maturity Date</h6>
+                                    <p class="text-muted">${investment.maturity_date ? new Date(investment.maturity_date).toLocaleDateString() : 'Not calculated'}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('investmentDetailsModal')).show();
+}
+
+// Filter Functions
+function filterPlans() {
+    const searchTerm = document.getElementById('plan-search').value.toLowerCase();
+    const durationFilter = document.getElementById('duration-filter').value;
+    const roiFilter = document.getElementById('roi-filter').value;
+    
+    filteredPlans = availablePlans.filter(plan => {
+        const matchesSearch = plan.name.toLowerCase().includes(searchTerm) || 
+                            (plan.description && plan.description.toLowerCase().includes(searchTerm));
+        
+        let matchesDuration = true;
+        if (durationFilter) {
+            matchesDuration = plan.duration_days == durationFilter;
+        }
+        
+        let matchesROI = true;
+        if (roiFilter) {
+            const roi = parseFloat(plan.roi_rate);
+            switch(roiFilter) {
+                case '5-10': matchesROI = roi >= 5 && roi <= 10; break;
+                case '10-15': matchesROI = roi >= 10 && roi <= 15; break;
+                case '15-20': matchesROI = roi >= 15 && roi <= 20; break;
+                case '20+': matchesROI = roi >= 20; break;
+            }
+        }
+        
+        return matchesSearch && matchesDuration && matchesROI;
+    });
+    
+    updateAvailablePlansDisplay(filteredPlans);
+}
+
+function filterROIHistory() {
+    const dateFrom = document.getElementById('date-from').value;
+    const dateTo = document.getElementById('date-to').value;
+    
+    let url = '/api/v1/transactions/?transaction_type=ROI';
+    if (dateFrom) url += `&date_from=${dateFrom}`;
+    if (dateTo) url += `&date_to=${dateTo}`;
+    
+    // Reload ROI history with filters
+    loadROIHistoryWithFilters(url);
+}
+
+async function loadROIHistoryWithFilters(url) {
+    try {
+        const response = await apiRequest(url);
+        const data = await response.json();
+        
+        if (response.ok) {
+            updateROIHistoryDisplay(data.results || []);
+        } else {
+            throw new Error(data.detail || 'Failed to load filtered ROI history');
+        }
+    } catch (error) {
+        console.error('Error loading filtered ROI history:', error);
+        showError('Failed to load filtered ROI history');
+    }
+}
+
+// Calculation Functions
+function calculateInvestmentProgress(investment) {
+    if (!investment.start_date || !investment.maturity_date) return 0;
+    
+    const start = new Date(investment.start_date);
+    const end = new Date(investment.maturity_date);
+    const now = new Date();
+    
+    const total = end - start;
+    const elapsed = now - start;
+    
+    return Math.min(100, Math.max(0, (elapsed / total) * 100));
+}
+
+function calculateDailyROI(investment) {
+    const amount = parseFloat(investment.amount);
+    const roiRate = parseFloat(investment.plan?.roi_rate || 0);
+    const frequency = investment.plan?.frequency || 'daily';
+    
+    if (frequency === 'daily') {
+        return (amount * roiRate) / 100;
+    } else if (frequency === 'monthly') {
+        return (amount * roiRate) / 100 / 30;
+    }
+    
+    return 0;
+}
+
+function calculateReturns() {
+    const amount = parseFloat(document.getElementById('investment-amount').value) || 0;
+    const planId = document.getElementById('selected-plan-id').value;
+    const plan = availablePlans.find(p => p.id === planId);
+    
+    if (!plan || amount === 0) {
+        document.getElementById('daily-roi').textContent = '₹0.00';
+        document.getElementById('total-return').textContent = '₹0.00';
+        return;
+    }
+    
+    const roiRate = parseFloat(plan.roi_rate) / 100;
+    const dailyROI = plan.frequency === 'daily' ? amount * roiRate : amount * roiRate / 30;
+    const totalReturn = amount * roiRate;
+    
+    document.getElementById('daily-roi').textContent = `₹${dailyROI.toFixed(2)}`;
+    document.getElementById('total-return').textContent = `₹${totalReturn.toFixed(2)}`;
+}
+
+// Utility Functions
+function getInvestmentStatusColor(status) {
+    switch(status?.toLowerCase()) {
+        case 'active': return 'success';
+        case 'completed': return 'primary';
+        case 'paused': return 'warning';
+        case 'cancelled': return 'danger';
+        default: return 'secondary';
+    }
+}
+
+function getStatusColor(status) {
+    switch(status?.toLowerCase()) {
+        case 'completed':
+        case 'approved':
+        case 'success': return 'success';
+        case 'pending': return 'warning';
+        case 'failed':
+        case 'rejected': return 'danger';
+        default: return 'secondary';
+    }
+}
+
+function showLoading(message = 'Loading...') {
+    const loadingHtml = `
+        <div id="loading-overlay" class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" 
+             style="background-color: rgba(0,0,0,0.5); z-index: 9999;">
+            <div class="card text-center p-4">
+                <div class="card-body">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mb-0">${message}</p>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', loadingHtml);
+}
+
+function hideLoading() {
+    const overlay = document.getElementById('loading-overlay');
+    if (overlay) {
+        overlay.remove();
+    }
+}
+</script>
+
+{% endblock %}
